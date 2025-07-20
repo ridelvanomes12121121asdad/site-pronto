@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login e Cadastro - Dell Tech</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body>
+    <!-- ======================= HEADER SIMPLIFICADO ======================= -->
+    <header class="header">
+        <a href="index.html" class="logo">Dell Tech</a>
+    </header>
+
+    <main>
+        <section class="login-section">
+            <div class="login-container">
+                <div class="form-toggle">
+                    <button id="show-login-btn" class="active">Entrar</button>
+                    <button id="show-signup-btn">Cadastrar</button>
+                </div>
+
+                <form id="auth-form">
+                    <!-- Campos de Cadastro (inicialmente ocultos) -->
+                    <div class="form-group signup-only">
+                        <label for="signup-name">Nome Completo</label>
+                        <input type="text" id="signup-name" placeholder="Seu nome completo">
+                    </div>
+
+                    <!-- Campos Comuns -->
+                    <div class="form-group">
+                        <label for="auth-email">Email</label>
+                        <input type="email" id="auth-email" placeholder="seu@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="auth-password">Senha</label>
+                        <input type="password" id="auth-password" placeholder="••••••••" required>
+                    </div>
+
+                    <!-- Campo de Confirmação de Senha (inicialmente oculto) -->
+                    <div class="form-group signup-only">
+                        <label for="signup-password-confirm">Confirmar Senha</label>
+                        <input type="password" id="signup-password-confirm" placeholder="••••••••">
+                    </div>
+                    
+                    <p class="error-message" id="error-message"></p>
+
+                    <button type="submit" class="btn btn--primary btn--full" id="auth-submit-btn">Entrar</button>
+                </form>
+            </div>
+            <a href="index.html" class="back-link"><i data-feather="arrow-left"></i> Voltar para a loja</a>
+        </section>
+    </main>
+
+    <!-- SCRIPT DO FIREBASE COM SUAS CHAVES PESSOAIS -->
+    <script type="module">
+        // 1. Importar as funções necessárias do Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+
+        // 2. SUAS CHAVES PESSOAIS DO FIREBASE JÁ ESTÃO AQUI
+        const firebaseConfig = {
+            apiKey: "AIzaSyCeqMGgvrR5DqCEM-pq-DcBnezcsgtoDns",
+            authDomain: "dell-tech-loja.firebaseapp.com",
+            projectId: "dell-tech-loja",
+            storageBucket: "dell-tech-loja.firebasestorage.app", // O correto é firebasestorage.app
+            messagingSenderId: "1020384524136",
+            appId: "1:1020384524136:web:833540b300d887836608dd"
+        };
+
+        // 3. Inicializar o Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        feather.replace();
+
+        // 4. Lógica do Formulário
+        const loginBtn = document.getElementById('show-login-btn');
+        const signupBtn = document.getElementById('show-signup-btn');
+        const form = document.getElementById('auth-form');
+        const nameField = document.getElementById('signup-name');
+        const emailField = document.getElementById('auth-email');
+        const passwordField = document.getElementById('auth-password');
+        const confirmPasswordField = document.getElementById('signup-password-confirm');
+        const submitBtn = document.getElementById('auth-submit-btn');
+        const errorMessage = document.getElementById('error-message');
+
+        let isLoginMode = true;
+
+        loginBtn.addEventListener('click', () => {
+            isLoginMode = true;
+            form.classList.remove('signup-mode');
+            loginBtn.classList.add('active');
+            signupBtn.classList.remove('active');
+            submitBtn.textContent = 'Entrar';
+            errorMessage.textContent = '';
+        });
+
+        signupBtn.addEventListener('click', () => {
+            isLoginMode = false;
+            form.classList.add('signup-mode');
+            signupBtn.classList.add('active');
+            loginBtn.classList.remove('active');
+            submitBtn.textContent = 'Criar Conta';
+            errorMessage.textContent = '';
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = emailField.value;
+            const password = passwordField.value;
+            errorMessage.textContent = '';
+
+            if (isLoginMode) {
+                // Lógica de Login
+                try {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    alert('Login realizado com sucesso!');
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    errorMessage.textContent = 'Email ou senha inválidos.';
+                }
+            } else {
+                // Lógica de Cadastro
+                const name = nameField.value;
+                const confirmPassword = confirmPasswordField.value;
+
+                if (name.length < 3) { errorMessage.textContent = 'Por favor, insira seu nome completo.'; return; }
+                if (password !== confirmPassword) { errorMessage.textContent = 'As senhas não coincidem.'; return; }
+                if (password.length < 6) { errorMessage.textContent = 'A senha deve ter no mínimo 6 caracteres.'; return; }
+
+                try {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                    alert('Conta criada com sucesso! Você será redirecionado.');
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    if (error.code === 'auth/email-already-in-use') {
+                        errorMessage.textContent = 'Este email já está em uso.';
+                    } else {
+                        errorMessage.textContent = 'Ocorreu um erro ao criar a conta.';
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

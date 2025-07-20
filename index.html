@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dell Tech | Smartwatch T800 Ultra</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body>
+
+    <!-- ======================= PRELOADER ======================= -->
+    <div class="preloader">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- ======================= HEADER ======================= -->
+    <header class="header">
+        <a href="index.html" class="logo">Dell Tech</a>
+        <div class="header__actions">
+            <a href="logincadastro.html" class="login-icon" aria-label="Acessar página de login">
+                <i data-feather="user"></i>
+            </a>
+            <div class="cart-icon" aria-label="Abrir carrinho de compras">
+                <i data-feather="shopping-cart"></i>
+                <span class="cart__counter">0</span>
+            </div>
+            <div class="hamburger" aria-label="Abrir menu de navegação">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </header>
+    
+    <!-- ======================= MENU LATERAL (NAV) ======================= -->
+    <nav class="nav-menu">
+        <div class="nav-menu__header">
+            <h3>Menu</h3>
+            <button class="nav-menu__close" aria-label="Fechar menu de navegação"><i data-feather="x"></i></button>
+        </div>
+        <ul>
+            <li><a href="#hero" class="nav__link">Início</a></li>
+            <li><a href="#product" class="nav__link">Produto</a></li>
+            <li><a href="#reviews" class="nav__link">Avaliações</a></li>
+            <li><a href="#contact" class="nav__link">Contato</a></li>
+        </ul>
+    </nav>
+
+    <!-- ======================= GAVETA DO CARRINHO (CART DRAWER) ======================= -->
+    <div class="cart-drawer">
+        <div class="cart-drawer__header">
+            <h2>Meu Carrinho</h2>
+            <button class="cart-drawer__close" aria-label="Fechar carrinho de compras"><i data-feather="x"></i></button>
+        </div>
+        <div class="cart-drawer__body">
+            <ul id="cart-items-list">
+                <li class="cart-empty-message">Seu carrinho está vazio.</li>
+            </ul>
+        </div>
+        <div class="cart-drawer__footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cart-total-price">R$ 0,00</span>
+            </div>
+            <a href="pagamento.html" id="cart-checkout-btn" class="btn btn--primary checkout-btn">Finalizar Compra</a>
+        </div>
+    </div>
+    
+    <!-- Overlay para o fundo -->
+    <div class="overlay"></div>
+
+    <main>
+        <!-- ======================= HERO BANNER ======================= -->
+        <section id="hero" class="hero">
+            <div class="hero__content">
+                <h1 class="hero__title">Relógio Smartwatch T800 Ultra</h1>
+                <p class="hero__subtitle">O mais completo da categoria, com entrega em <strong>2 horas</strong> em toda São Luís.</p>
+                 <div class="hero__info-cards">
+                    <div class="info-card">
+                        <i data-feather="map-pin"></i>
+                        <span>São Luís, MA</span>
+                    </div>
+                    <div class="info-card">
+                        <i data-feather="truck"></i>
+                        <span>Frete Grátis</span>
+                    </div>
+                    <div class="info-card">
+                        <i data-feather="gift"></i>
+                        <span>Pulseiras Extras</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- ======================= VIDEO SECTION ======================= -->
+        <section id="video" class="video-section">
+            <div class="video-section__header">
+                <h2 class="video-section__title">Relógio Smartwatch T800 Ultra</h2>
+                <p class="video-section__subtitle">Exibição prática.</p>
+            </div>
+            <div class="video-player">
+                <video id="product-video" autoplay loop muted>
+                    <source src="img/video/relogio.mp4" type="video/mp4">
+                    Seu navegador não suporta a tag de vídeo.
+                </video>
+                <div class="video-overlay-icon">
+                    <i data-feather="pause" id="video-icon"></i>
+                </div>
+            </div>
+        </section>
+        
+        <!-- ======================= PRODUCT SECTION ======================= -->
+        <section id="product" class="product-section">
+            <div class="product__content">
+                <h2 class="section-title product__main-title">Relógio Smartwatch T800 Ultra - Kit Completo</h2>
+                <div class="product__gallery">
+                    <div class="gallery__main-image">
+                        <img src="img/1.webp" alt="Caixa do Smartwatch T800 Ultra com todos os itens" id="main-product-image">
+                        <button class="gallery__nav-arrow prev" id="prev-image-btn" aria-label="Imagem anterior">
+                            <i data-feather="chevron-left"></i>
+                        </button>
+                        <button class="gallery__nav-arrow next" id="next-image-btn" aria-label="Próxima imagem">
+                            <i data-feather="chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="gallery__thumbnails">
+                        <img src="img/pr.webp" alt="Thumbnail da caixa do relógio" class="thumbnail active">
+                        <img src="img/la.webp" alt="Thumbnail do relógio de perto" class="thumbnail">
+                        <img src="img/pr.webp" alt="Thumbnail do carregador wireless" class="thumbnail">
+                        <img src="img/preto.webp" alt="Thumbnail das pulseiras extras" class="thumbnail">
+                    </div>
+                </div>
+                <div class="product__details" 
+                     data-product-id="t800-ultra" 
+                     data-product-name="Smartwatch T800 Ultra" 
+                     data-product-price="150.00" 
+                     data-product-image="img/1.webp">
+                    <div class="product__rating">
+                        <div class="stars">★★★★★</div>
+                        <span>(Baseado em 212 avaliações)</span>
+                    </div>
+                    <p class="product__price">R$ 150,00</p>
+                    <div class="product__specs">
+                        <h3>O que você vai recebe:</h3>
+                        <ul>
+                            <li><strong>Relógio T800 Ultra</strong> com tela infinita de 1.99"</li>
+                            <li><strong>Carregador Magnético</strong> sem fio (Wireless)</li>
+                            <li><strong>1 Pulseira Ocean</strong> na cor Laranja</li>
+                            <li><strong>+3 Pulseiras Extras</strong> (Branca, Preta e Verde)</li>
+                            <li><strong>Compatibilidade Total</strong> com iOS e Android</li>
+                        </ul>
+                    </div>
+                    <div class="product__actions">
+                        <div class="quantity-selector">
+                            <button class="quantity-btn" id="decrease-qty" aria-label="Diminuir quantidade">-</button>
+                            <input type="text" id="quantity" value="1" readonly aria-label="Quantidade atual">
+                            <button class="quantity-btn" id="increase-qty" aria-label="Aumentar quantidade">+</button>
+                        </div>
+                        <button class="btn btn--secondary" id="buy-now-btn">Comprar Agora</button>
+                        <button class="btn btn--primary" id="add-to-cart-btn">Adicionar ao Carrinho</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======================= REVIEWS SECTION ======================= -->
+        <section id="reviews" class="reviews-section">
+            <h2 class="section-title">O que nossos clientes dizem</h2>
+            <div class="reviews-container">
+                <div class="review-post">
+                    <div class="review-post__header">
+                        <img src="img/reviw/m.jpeg" alt="Avatar do cliente" class="review-post__avatar">
+                        <div class="review-post__user-info">
+                            <span class="review-post__user">Larissa Mendes – Anil</span>
+                            <div class="review-post__stars" aria-label="Nota 5 de 5 estrelas">★★★★★</div>
+                        </div>
+                    </div>
+                    <div class="review-post__meta">
+                        <span>2025-02-27 10:10</span> | <span>Kit: T800-ULTRA</span>
+                    </div>
+                    <p class="review-post__body">
+                        fiz o pedido e rapidinho já tava com o relógio na mão muito lindo do jeitinho que eu queria entrega super rápida adorei tudo
+                    </p>
+                    <div class="review-post__gallery">
+                        <img src="img/reviw/1.webp" alt="Foto 1 da avaliação do cliente">
+                        <img src="img/reviw/2.webp" alt="Foto 2 da avaliação do cliente">
+                        <img src="img/reviw/3.webp" alt="Foto 3 da avaliação do cliente">
+                        <img src="img/reviw/4.webp" alt="Foto 4 da avaliação do cliente">
+                    </div>
+                    <div class="review-post__footer">
+                        <i data-feather="thumbs-up"></i>
+                        
+                    </div>
+                </div>
+                <div class="review-post">
+                    <div class="review-post__header">
+                        <img src="img/reviw/l.jpeg" alt="Avatar do cliente" class="review-post__avatar">
+                        <div class="review-post__user-info">
+                            <span class="review-post__user">aline - Cohama</span>
+                            <div class="review-post__stars" aria-label="Nota 4 de 5 estrelas">★★★★☆</div>
+                        </div>
+                    </div>
+                    <div class="review-post__meta">
+                        <span>2025-05-18 19:45</span> | <span>Kit: T800-ULTRA</span>
+                    </div>
+                    <p class="review-post__body">
+                       pedi de manhã e chegou antes do almoço frete grátis mesmo o relógio veio certinho amei demais
+
+
+                    </p>
+                    <div class="review-post__gallery">
+                         <img src="img/reviw/11.webp" alt="Foto A da avaliação do cliente">
+                         <img src="img/reviw/22.webp" alt="Foto B da avaliação do cliente">
+                         <img src="img/reviw/33.webp" alt="Foto C da avaliação do cliente">
+                         <img src="img/reviw/44.webp" alt="Foto D da avaliação do cliente">
+                         
+                         
+                    </div>
+                    <div class="review-post__footer">
+                        <i data-feather="thumbs-up"></i>
+                        
+                    </div>
+                </div>
+                <div class="review-post">
+                    <div class="review-post__header">
+                        <img src="img/reviw/s.jpeg" alt="Avatar do cliente" class="review-post__avatar">
+                        <div class="review-post__user-info">
+                            <span class="review-post__user">Ana Paula – Turu</span>
+                            <div class="review-post__stars" aria-label="Nota 5 de 5 estrelas">★★★★★</div>
+                        </div>
+                    </div>
+                    <div class="review-post__meta">
+                        <span>2025-04-30 14:30</span> | <span>Kit: T800-ULTRA</span>
+                    </div>
+                    <p class="review-post__body">
+                        Atendimento nota 10 comprei e chegou rapidão aqui em casa em menos de 1 hora o relógio é bonito tô usando direto pode confiar. Recomendo 100% a Dell Tech!
+                    </p>
+                    <div class="review-post__gallery">
+                         <img src="img/reviw/111.webp" alt="Foto A da avaliação do cliente">
+                         <img src="img/reviw/222.webp" alt="Foto B da avaliação do cliente">
+                         <img src="img/reviw/333.webp" alt="Foto C da avaliação do cliente">
+                         <img src="img/reviw/444.webp" alt="Foto D da avaliação do cliente">
+                         
+                         
+                    </div>
+                    <div class="review-post__footer">
+                        <i data-feather="thumbs-up"></i>
+                       
+                    </div>
+                </div>
+            </div>
+            <div class="reviews-footer">
+                <a href="avaliacoes.html" class="btn btn--secondary">Ver todas as avaliações</a>
+            </div>
+        </section>
+    </main>
+
+    <!-- ======================= FOOTER ======================= -->
+    <footer id="contact" class="footer">
+        <div class="footer__content">
+            <div class="footer__contact-cards">
+                <a href="https://wa.me/5599985324277?text=Ol%C3%A1!%20Vi%20o%20rel%C3%B3gio%20no%20seu%20site%20e%20quero%20comprar%20agora.%20Sou%20de%20S%C3%A3o%20Lu%C3%ADs%20e%20vi%20que%20a%20entrega%20%C3%A9%20em%20at%C3%A9%202%20horas%20com%20frete%20gr%C3%A1tis." target="_blank" class="contact-card">
+                    <i data-feather="message-circle"></i>
+                    <h3>WhatsApp</h3>
+                    <p>(99) 98532-4277</p>
+                </a>
+                <a href="mailto:contato@delltech.com" class="contact-card">
+                    <i data-feather="mail"></i>
+                    <h3>E-mail</h3>
+                    <p>contato@delltech.com</p>
+                </a>
+                <a href="tel:+559833333333" class="contact-card">
+                    <i data-feather="phone-call"></i>
+                    <h3>Telefone</h3>
+                    <p>(99) 985324277</p>
+                </a>
+            </div>
+            <div class="footer__info">
+                <div class="info__address">
+                    <h4>Nosso Endereço</h4>
+                    <p>Av. dos Holandeses, 1000 - Calhau, São Luís - MA</p>
+                    <p>Atendimento: Seg a Sáb, 9h - 18h</p>
+                </div>
+                <div class="info__social">
+                    <h4>Siga-nos</h4>
+                    <div class="social-icons">
+                        <a href="https://www.instagram.com/dell_tech_slz/" aria-label="Visite nosso Instagram"><i data-feather="instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer__bottom">
+            <p>© 2025 Dell Tech. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+    
+    <!-- ======================= BOTÃO WHATSAPP FLUTUANTE ======================= -->
+    <a href="https://wa.me/5599985324277?text=Ol%C3%A1!%20Vi%20o%20rel%C3%B3gio%20no%20seu%20site%20e%20quero%20comprar%20agora.%20Sou%20de%20S%C3%A3o%20Lu%C3%ADs%20e%20vi%20que%20a%20entrega%20%C3%A9%20em%20at%C3%A9%202%20horas%20com%20frete%20gr%C3%A1tis." class="whatsapp-float" target="_blank" aria-label="Fale Conosco no WhatsApp">
+        <i data-feather="message-circle"></i>
+    </a>
+
+    <script src="script.js"></script>
+</body>
+</html>

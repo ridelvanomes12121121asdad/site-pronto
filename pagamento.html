@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finalizar Pedido - Dell Tech</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body>
+
+    <!-- ======================= PRELOADER ======================= -->
+    <div class="preloader">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- ======================= HEADER SIMPLIFICADO ======================= -->
+    <header class="header">
+        <a href="index.html" class="logo">Dell Tech</a>
+    </header>
+
+    <main>
+        <section class="payment-section">
+            <div class="payment-container">
+
+                <!-- ======================= RESUMO DO PEDIDO ======================= -->
+                <div class="order-summary">
+                    <h2 class="section-title">Resumo do Pedido</h2>
+                    <div id="order-summary-content">
+                        <!-- Itens do pedido serão inseridos aqui -->
+                    </div>
+                    <div class="summary-total" id="summary-total-container">
+                        <!-- Total será inserido aqui -->
+                    </div>
+                    <div class="delivery-info">
+                        <i data-feather="truck"></i>
+                        <p><strong>Frete Grátis</strong> para toda São Luís com entrega em <strong>até 2 horas!</strong></p>
+                    </div>
+                </div>
+
+                <!-- ======================= SELEÇÃO DE PAGAMENTO ======================= -->
+                <div class="payment-selection">
+                    <h2 class="section-title">Como você prefere pagar?</h2>
+                    <div class="payment-methods">
+                        <button class="payment-method-btn" data-method="Pix">
+                            <img src="https://logopng.com.br/logos/pix-106.svg" alt="Ícone do Pix" class="payment-icon">
+                            <span>Pix</span>
+                        </button>
+                        <button class="payment-method-btn" data-method="Cartão (Crédito/Débito)">
+                            <i data-feather="credit-card"></i>
+                            <span>Cartão</span>
+                        </button>
+                        <button class="payment-method-btn" data-method="Dinheiro">
+                            <i data-feather="dollar-sign"></i>
+                            <span>Dinheiro</span>
+                        </button>
+                        <button class="payment-method-btn" data-method="Pagar na Entrega (Maquininha)">
+                            <i data-feather="home"></i>
+                            <span>Pagar na Entrega</span>
+                        </button>
+                    </div>
+                    <button id="finalize-btn" class="btn btn--primary btn--full" disabled>
+                        Finalizar Pedido via WhatsApp
+                    </button>
+                </div>
+            </div>
+            <a href="index.html" class="back-link"><i data-feather="arrow-left"></i> Voltar para a loja</a>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace();
+
+            // Lógica do Preloader
+            const preloader = document.querySelector('.preloader');
+            window.addEventListener('load', () => {
+                setTimeout(() => {
+                    preloader.classList.add('preloader-hidden');
+                }, 1000);
+            });
+
+            const orderSummaryContent = document.getElementById('order-summary-content');
+            const summaryTotalContainer = document.getElementById('summary-total-container');
+            const paymentButtons = document.querySelectorAll('.payment-method-btn');
+            const finalizeBtn = document.getElementById('finalize-btn');
+            
+            let itemsParaComprar = [];
+            let selectedMethod = null;
+
+            const cartJSON = sessionStorage.getItem('cartParaComprar');
+            const singleItemJSON = sessionStorage.getItem('itemParaComprar');
+
+            if (cartJSON) {
+                itemsParaComprar = JSON.parse(cartJSON);
+            } else if (singleItemJSON) {
+                itemsParaComprar.push(JSON.parse(singleItemJSON));
+            }
+
+            if (itemsParaComprar.length > 0) {
+                let itemsHTML = '';
+                let totalPrice = 0;
+
+                itemsParaComprar.forEach(item => {
+                    const itemSubtotal = (item.price * item.quantity);
+                    totalPrice += itemSubtotal;
+                    itemsHTML += `
+                        <div class="summary-item">
+                            <img src="${item.image}" alt="${item.name}" class="summary-item__image">
+                            <div class="summary-item__details">
+                                <p class="summary-item__name">${item.name} (x${item.quantity})</p>
+                            </div>
+                            <p class="summary-item__price">R$ ${itemSubtotal.toFixed(2).replace('.', ',')}</p>
+                        </div>
+                    `;
+                });
+                
+                orderSummaryContent.innerHTML = itemsHTML;
+                summaryTotalContainer.innerHTML = `
+                    <span>Total:</span>
+                    <strong>R$ ${totalPrice.toFixed(2).replace('.', ',')}</strong>
+                `;
+            } else {
+                orderSummaryContent.innerHTML = '<p>Nenhum item selecionado. Por favor, volte à loja.</p>';
+                finalizeBtn.disabled = true;
+            }
+
+            paymentButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    paymentButtons.forEach(btn => btn.classList.remove('selected'));
+                    button.classList.add('selected');
+                    selectedMethod = button.dataset.method;
+                    finalizeBtn.disabled = false;
+                });
+            });
+
+            // LÓGICA DO BOTÃO FINALIZAR ATUALIZADA
+            finalizeBtn.addEventListener('click', () => {
+                if (!selectedMethod || itemsParaComprar.length === 0) return;
+
+                const textoBase = "Olá! Vi o relógio no seu site e quero comprar agora. Sou de São Luís e vi que a entrega é em até 2 horas com frete grátis.";
+                
+                let detalhesDoPedido = "\n\n*MEU PEDIDO:*\n";
+                let totalPedido = 0;
+                itemsParaComprar.forEach(item => {
+                    detalhesDoPedido += `- ${item.name} (x${item.quantity})\n`;
+                    totalPedido += item.price * item.quantity;
+                });
+                detalhesDoPedido += `*Total:* R$ ${totalPedido.toFixed(2)}\n`;
+                detalhesDoPedido += `*Pagamento:* ${selectedMethod}`;
+
+                const textoFinal = textoBase + detalhesDoPedido; // FRASE REMOVIDA DAQUI
+
+                const encodedText = encodeURIComponent(textoFinal);
+                const whatsappURL = `https://wa.me/5599985324277?text=${encodedText}`;
+
+                sessionStorage.removeItem('itemParaComprar');
+                sessionStorage.removeItem('cartParaComprar');
+                
+                window.open(whatsappURL, '_blank');
+            });
+        });
+    </script>
+</body>
+</html>
