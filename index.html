@@ -255,16 +255,17 @@
   // ---------- Configuração ----------
   const DB = "https://controle-de-lavagens-78b2e-default-rtdb.firebaseio.com";
   const EQUIPE = { Felipe: "#0f766e", Marcos: "#be185d", Jonathan: "#4338ca" };
-  const TIPOS = { novo: "Carro novo", of: "Oficina", teste: "Test drive", show: "Showroom", fora: "Por fora" };
-  const COR_TIPO = { novo: "#1b7f4b", of: "#b3382c", teste: "#b86e00", show: "#1f5fbf", fora: "#7a45b5" };
+  const TIPOS = { novo: "Carro novo", of: "Oficina", teste: "Test drive", show: "Showroom" };
+  const COR_TIPO = { novo: "#1b7f4b", of: "#b3382c", teste: "#b86e00", show: "#1f5fbf" };
   const PERIODOS = { hoje: "Hoje", sete: "Últimos 7 dias", trinta: "Últimos 30 dias", mes: "Este mês", tudo: "Todo o histórico" };
   const nomes = Object.keys(EQUIPE);
   const chavesTipos = Object.keys(TIPOS);
   const TEMA_CLARO = { texto: "#33424e", grade: "#dde3e8", ink: "#0f2230" };
+  const HORA_VIRADA = 20; // após 20:00, o "hoje" já é o dia seguinte
 
   // ---------- Estado ----------
   let periodo = "trinta";
-  let bruto = null;            // { lavagens, showroom } como vem do banco
+  let bruto = null;
   let erro = "";
   let carregando = true;
   let atualizadoEm = null;
@@ -279,6 +280,12 @@
     const dia = String(d.getDate()).padStart(2, "0");
     return d.getFullYear() + "-" + mes + "-" + dia;
   }
+  // Data de hoje considerando a virada às 20:00
+  function hojeOperacional() {
+    const d = new Date();
+    if (d.getHours() >= HORA_VIRADA) d.setDate(d.getDate() + 1);
+    return iso(d);
+  }
   function brData(dia) { return dia.split("-").reverse().join("/"); }
   function fmtData(dia) {
     const [a, m, d] = dia.split("-").map(Number);
@@ -289,7 +296,7 @@
   function media(total, dias) { return dias ? (total / dias).toFixed(1).replace(".", ",") : "—"; }
   function mediaNum(total, dias) { return dias ? Math.round((total / dias) * 10) / 10 : null; }
 
-  function ordenarDias(mapa) {   // [["2026-10-11", 8], ...] maior primeiro; empate: mais recente
+  function ordenarDias(mapa) {
     return Object.entries(mapa).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? 1 : -1));
   }
   function melhorDia(mapa) {
@@ -372,6 +379,7 @@
   // ---------- Cálculos ----------
   function inicioDoPeriodo() {
     const d = new Date();
+    if (d.getHours() >= HORA_VIRADA) d.setDate(d.getDate() + 1);
     if (periodo === "hoje") return iso(d);
     if (periodo === "sete") { d.setDate(d.getDate() - 6); return iso(d); }
     if (periodo === "trinta") { d.setDate(d.getDate() - 29); return iso(d); }
@@ -381,7 +389,7 @@
 
   function intervaloTexto() {
     const inicio = inicioDoPeriodo();
-    const fim = brData(iso(new Date()));
+    const fim = brData(hojeOperacional());
     return inicio === "0000-00-00" ? "até " + fim : brData(inicio) + " a " + fim;
   }
 
@@ -389,10 +397,10 @@
     const inicio = inicioDoPeriodo();
     const pessoas = {};
     nomes.forEach((n) => {
-      pessoas[n] = { total: 0, tipos: { novo: 0, of: 0, teste: 0, show: 0, fora: 0 }, dias: {}, idas: 0 };
+      pessoas[n] = { total: 0, tipos: { novo: 0, of: 0, teste: 0, show: 0 }, dias: {}, idas: 0 };
     });
 
-    const diasGeral = {};      // dia -> { total, porPessoa }
+    const diasGeral = {};
     let totalCarros = 0;
     for (const [dia, registros] of Object.entries(bruto.lavagens)) {
       if (dia < inicio) continue;
@@ -409,7 +417,7 @@
       }
     }
 
-    const idasPorDia = {};     // dia -> { nome: [horários] }
+    const idasPorDia = {};
     let totalIdas = 0;
     for (const [dia, registros] of Object.entries(bruto.showroom)) {
       if (dia < inicio) continue;
@@ -444,7 +452,6 @@
     return { texto: v("--mut") || TEMA_CLARO.texto, grade: v("--line") || TEMA_CLARO.grade, ink: v("--ink") || TEMA_CLARO.ink };
   }
 
-  // Monta as configurações dos 4 gráficos. Usada na tela e na exportação (paraImagem).
   function montarConfigs(A, tema, paraImagem) {
     const base = {
       responsive: !paraImagem,
@@ -552,7 +559,6 @@
     });
   }
 
-  // Desenha os gráficos fora da tela, com fundo branco, e devolve as imagens PNG.
   function imagensDosGraficos(A) {
     const configs = montarConfigs(A, TEMA_CLARO, true);
     const lista = [
@@ -623,8 +629,8 @@
 
     // --- Aba Resumo ---
     const r = wb.addWorksheet("Resumo", { views: [{ showGridLines: false }] });
-    r.columns = [28, 14, 14, 14, 14, 14, 12, 10, 12, 22, 16].map((width) => ({ width }));
-    r.mergeCells("A1:K1");
+    r.columns = [28, 14, 14, 14, 14, 12, 10, 12, 22, 16].map((width) => ({ width }));
+    r.mergeCells("A1:J1");
     r.getCell("A1").value = "Painel da Lavagem";
     r.getCell("A1").font = { bold: true, size: 20, color: { argb: PETROLEO } };
     r.getCell("A2").value = "Período: " + PERIODOS[periodo] + " (" + intervaloTexto() + ")";
@@ -654,15 +660,13 @@
       const nDias = Object.keys(p.dias).length;
       const l = r.addRow([n, ...chavesTipos.map((k) => p.tipos[k]), p.total, nDias, mediaNum(p.total, nDias), melhorDia(p.dias), p.idas]);
       corpo(l);
-      l.getCell(9).numFmt = "0.0";
+      l.getCell(8).numFmt = "0.0";
     });
     const geral = r.addRow(["Geral", ...chavesTipos.map((k) => tiposGeral[k]), A.totalCarros, diasComLavagem,
       mediaNum(A.totalCarros, diasComLavagem), melhorDia(mapaGeral), A.totalIdas]);
     corpo(geral, true);
-    geral.getCell(9).numFmt = "0.0";
+    geral.getCell(8).numFmt = "0.0";
     geral.eachCell((c) => { c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE8EEF2" } }; });
-    r.addRow([]);
-    r.addRow(["Média/dia = carros divididos pelos dias em que a pessoa lavou pelo menos um carro."]).getCell(1).font = { italic: true, color: { argb: "FF5B6B78" } };
 
     // --- Aba Gráficos (opcional) ---
     if (comGraficos) {
@@ -694,15 +698,15 @@
 
     // --- Aba Registros ---
     const reg = wb.addWorksheet("Registros", { views: [{ state: "frozen", ySplit: 1 }] });
-    reg.columns = [14, 10, 16, 16, 18].map((width) => ({ width }));
-    cabecalho(reg.addRow(["Data", "Hora", "Colaborador", "Tipo", "Placa/Chassi (4 últimos)"]));
+    reg.columns = [14, 10, 16, 16, 24, 16].map((width) => ({ width }));
+    cabecalho(reg.addRow(["Data", "Hora", "Colaborador", "Tipo", "Carro", "Placa/Chassi (4 últimos)"]));
     listarRegistros(bruto.lavagens).forEach((x) => {
-      const l = reg.addRow([dataExcel(x.dia), hora(x.ts), x.nome, TIPOS[x.tipo] || x.tipo, String(x.placa || "")]);
+      const l = reg.addRow([dataExcel(x.dia), hora(x.ts), x.nome, TIPOS[x.tipo] || x.tipo, x.carro || "", String(x.placa || "")]);
       corpo(l);
       l.getCell(1).numFmt = "dd/mm/yyyy";
-      l.getCell(5).numFmt = "@";
+      l.getCell(6).numFmt = "@";
     });
-    reg.autoFilter = { from: "A1", to: "E1" };
+    reg.autoFilter = { from: "A1", to: "F1" };
 
     // --- Aba Showroom ---
     const sh = wb.addWorksheet("Showroom", { views: [{ state: "frozen", ySplit: 1 }] });
@@ -718,7 +722,7 @@
     return wb.xlsx.writeBuffer();
   }
 
-  // Planilha no modelo da folha de lavagem impressa: uma aba por dia, com a coluna HORÁRIO a mais.
+  // Planilha no modelo da folha de lavagem impressa, agora com VEICULO preenchido
   async function gerarPlanilhaDiaria() {
     const wb = new ExcelJS.Workbook();
     wb.creator = "Painel da Lavagem";
@@ -730,10 +734,10 @@
 
     const porDia = {};
     listarRegistros(bruto.lavagens).forEach((x) => {
-      (porDia[x.dia] = porDia[x.dia] || []).push(x);   // já vem em ordem de horário
+      (porDia[x.dia] = porDia[x.dia] || []).push(x);
     });
     let dias = Object.keys(porDia).sort();
-    if (!dias.length) dias = [iso(new Date())];
+    if (!dias.length) dias = [hojeOperacional()];
 
     dias.forEach((dia) => {
       const registros = porDia[dia] || [];
@@ -749,7 +753,7 @@
           margins: { left: 0.5, right: 0.5, top: 0.6, bottom: 0.6, header: 0.3, footer: 0.3 }
         }
       });
-      ws.columns = [6, 34, 24, 20, 22, 12].map((width) => ({ width }));
+      ws.columns = [6, 26, 22, 20, 22, 12].map((width) => ({ width }));
 
       // Linha 1: título (A:D) e data (E:F)
       ws.mergeCells("A1:D1");
@@ -777,12 +781,19 @@
         cel.alignment = { horizontal: "center", vertical: "middle" };
       });
 
-      // Linhas numeradas (os carros do dia, e linhas vazias até completar o modelo)
+      // Linhas numeradas
       for (let i = 0; i < total; i++) {
         const x = registros[i];
         const linha = ws.getRow(3 + i);
         linha.height = 22;
-        const valores = [i + 1, "", x ? String(x.placa || "") : "", x ? (TIPOS[x.tipo] || x.tipo) : "", x ? x.nome : "", x ? hora(x.ts) : ""];
+        const valores = [
+          i + 1,
+          x ? (x.carro || "") : "",
+          x ? String(x.placa || "") : "",
+          x ? (TIPOS[x.tipo] || x.tipo) : "",
+          x ? x.nome : "",
+          x ? hora(x.ts) : ""
+        ];
         valores.forEach((v, c) => {
           const cel = linha.getCell(c + 1);
           cel.value = v;
@@ -822,10 +833,11 @@
     toast("Gerando planilha…");
     try {
       const buffer = comGraficos ? await gerarXlsx(true) : await gerarPlanilhaDiaria();
-      const nome = (comGraficos ? "painel-lavagem-" : "planilha-lavagem-") + periodo + "-" + iso(new Date()) + (comGraficos ? "-graficos" : "") + ".xlsx";
+      const nome = (comGraficos ? "painel-lavagem-" : "planilha-lavagem-") + periodo + "-" + hojeOperacional() + (comGraficos ? "-graficos" : "") + ".xlsx";
       baixarArquivo(buffer, nome);
       toast("Planilha pronta: " + nome);
     } catch (e) {
+      console.error(e);
       toast("Não foi possível gerar a planilha.");
     }
     exportando = false;
@@ -882,7 +894,7 @@
         <div class="mixwrap">${barraMix(tiposGeral, false)}${legendaMix(tiposGeral)}</div>
       </section>`;
 
-    // --- Fichas da equipe (ordenadas por total) ---
+    // --- Fichas da equipe ---
     const ordem = nomes.slice().sort((a, b) => A.pessoas[b].total - A.pessoas[a].total);
     const fichas = ordem.map((n) => {
       const p = A.pessoas[n];
@@ -1027,6 +1039,16 @@
   });
 
   carregar();
+
+  // Recarrega o painel quando virar a hora (20:00)
+  let diaAtualVisivel = hojeOperacional();
+  setInterval(() => {
+    const novoDia = hojeOperacional();
+    if (novoDia !== diaAtualVisivel) {
+      diaAtualVisivel = novoDia;
+      carregar();
+    }
+  }, 60000);
 </script>
 </body>
 </html>
