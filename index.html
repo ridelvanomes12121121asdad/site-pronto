@@ -52,7 +52,6 @@
   h2 { font-size: 26px; font-weight: 700; margin: 40px 0 4px; }
   .nota { color: var(--mut); font-size: 14px; margin: 0 0 14px; }
 
-  /* ---------- Barra superior ---------- */
   .topo {
     position: sticky; top: 0; z-index: 20;
     background: var(--bg);
@@ -107,7 +106,6 @@
   .pop b { display: block; font-weight: 600; }
   .pop span { color: var(--mut); font-size: 13px; }
 
-  /* ---------- Destaque ---------- */
   .hero {
     background: var(--hero); color: #fff; border-radius: 22px; padding: 30px 32px;
     display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px 40px; margin-top: 20px;
@@ -128,7 +126,6 @@
   .legenda span { display: inline-flex; align-items: center; gap: 7px; opacity: .92; }
   .legenda b { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
 
-  /* ---------- Equipe ---------- */
   .equipe { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 14px; }
   .ficha {
     position: relative; overflow: hidden; background: var(--panel);
@@ -149,28 +146,157 @@
   dl.fatos dt { color: var(--mut); }
   dl.fatos dd { margin: 0; font-weight: 600; text-align: right; }
 
-  /* ---------- Líderes por tipo ---------- */
-  .amostras { display: grid; grid-template-columns: repeat(auto-fit, minmax(176px, 1fr)); gap: 12px; }
-  .amostra { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-  .amostra .faixa { background: var(--c); color: #fff; font: 600 17px var(--font-d); padding: 8px 14px; letter-spacing: .02em; }
-  .amostra .corpo { padding: 12px 14px 14px; }
-  .amostra .quem { display: flex; flex-wrap: wrap; gap: 6px 10px; font-weight: 600; min-height: 24px; align-items: center; }
-  .amostra .quem .avatar { width: 22px; height: 22px; font-size: 13px; }
-  .amostra .qtd { color: var(--mut); font-size: 14px; margin-top: 4px; }
+  .amostras { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .amostra {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .amostra .faixa {
+    background: var(--c); color: #fff;
+    font: 600 17px var(--font-d);
+    padding: 10px 16px; letter-spacing: .03em;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .amostra .faixa .bolinha-tipo {
+    width: 10px; height: 10px; border-radius: 3px; background: rgba(255,255,255,.75);
+  }
+  .amostra .corpo { padding: 16px 16px 18px; flex: 1; display: flex; flex-direction: column; }
+  .amostra .lider { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .amostra .lider .avatar { width: 48px; height: 48px; font-size: 24px; }
+  .amostra .lider .dados { flex: 1; min-width: 0; }
+  .amostra .lider .nome { font: 700 24px var(--font-d); line-height: 1.05; margin-bottom: 2px; }
+  .amostra .lider .num { font: 600 16px var(--font-b); color: var(--mut); }
+  .amostra .lider .num b { color: var(--ink); font-weight: 700; }
+  .amostra .empate {
+    font-size: 12px; font-weight: 700; color: var(--mut);
+    text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px;
+  }
+  .amostra .barra { height: 8px; border-radius: 99px; background: var(--soft); overflow: hidden; margin-top: auto; }
+  .amostra .barra i { display: block; height: 100%; background: var(--c); border-radius: 99px; }
+  .amostra .rodape { display: flex; justify-content: space-between; font-size: 13px; color: var(--mut); margin-top: 8px; font-variant-numeric: tabular-nums; }
+  .amostra.vazia { opacity: .55; }
+  .amostra.vazia .corpo { text-align: center; color: var(--mut); font-size: 15px; padding: 26px 16px; }
 
-  /* ---------- Painéis, tabela e listas ---------- */
+  .comparativo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .comp-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .comp-card .topo-pessoa {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--soft);
+    border-bottom: 1px solid var(--line);
+  }
+  .comp-card .topo-pessoa .avatar {
+    width: 38px; height: 38px; font-size: 20px;
+  }
+  .comp-card .topo-pessoa .nome {
+    font: 700 24px var(--font-d);
+    color: var(--cor);
+    line-height: 1;
+  }
+  .comp-card .topo-pessoa .pos {
+    font: 600 14px var(--font-d);
+    color: var(--mut);
+    margin-top: 2px;
+  }
+  .comp-card .total-destaque {
+    padding: 14px 16px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  .comp-card .total-destaque .numero {
+    font: 700 44px/1 var(--font-d);
+  }
+  .comp-card .total-destaque .rotulo {
+    font-size: 15px;
+    color: var(--mut);
+  }
+  .comp-card .tipos-lista {
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .comp-card .tipos-lista .linha {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .comp-card .tipos-lista .bolinha {
+    width: 10px; height: 10px;
+    border-radius: 3px; flex: none;
+  }
+  .comp-card .tipos-lista .rotulo {
+    flex: 1;
+    font-size: 14px;
+    color: var(--mut);
+  }
+  .comp-card .tipos-lista .valor {
+    font: 700 18px var(--font-d);
+    font-variant-numeric: tabular-nums;
+  }
+  .comp-card .tipos-lista .valor.zero { color: var(--mut); opacity: .55; }
+  .comp-card .extras {
+    padding: 12px 16px 14px;
+    border-top: 1px solid var(--line);
+    background: color-mix(in srgb, var(--soft) 40%, var(--panel));
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 14px;
+    font-size: 13px;
+  }
+  .comp-card .extras .rotulo { color: var(--mut); display: block; }
+  .comp-card .extras .valor { font-weight: 700; font-size: 15px; }
+
+  .geral-faixa {
+    margin-top: 16px;
+    background: var(--hero);
+    color: #fff;
+    border-radius: 14px;
+    padding: 18px 22px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px 32px;
+  }
+  .geral-faixa h3 {
+    font: 700 26px var(--font-d);
+    margin: 0;
+  }
+  .geral-faixa .item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .geral-faixa .item .rotulo {
+    font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
+    opacity: .7; font-weight: 600;
+  }
+  .geral-faixa .item .valor {
+    font: 700 22px var(--font-d);
+    font-variant-numeric: tabular-nums;
+  }
+
   .painel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
   .painel h3 { font-size: 20px; font-weight: 600; margin-bottom: 10px; }
   .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 14px; }
   .grande-col { grid-column: 1 / -1; }
   .graf { position: relative; height: 290px; }
   .rolagem { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; min-width: 680px; }
-  th, td { padding: 11px 10px; text-align: center; border-bottom: 1px solid var(--line); white-space: nowrap; font-variant-numeric: tabular-nums; }
-  th { font-size: 13px; color: var(--mut); font-weight: 600; }
-  th:first-child, td:first-child { text-align: left; }
-  tr.geral td { font-weight: 700; border-top: 2px solid var(--ink); border-bottom: 0; background: var(--soft); }
-  .ponto { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; background: var(--cor); }
 
   .rk { position: relative; display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px; overflow: hidden; background: var(--soft); margin-bottom: 6px; }
   .rk .fill { position: absolute; inset: 0 auto 0 0; background: var(--cor, var(--accent)); opacity: .2; }
@@ -183,6 +309,7 @@
   .tres h3 { display: flex; align-items: center; gap: 8px; }
 
   .chip { display: inline-block; padding: 2px 10px; border-radius: 99px; color: #fff; font-size: 13px; font-weight: 600; background: var(--cor); }
+
   .ida-linha { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
   .ida-linha:last-child { border-bottom: 0; }
   .ida-linha .data { font-weight: 600; min-width: 130px; }
@@ -195,7 +322,7 @@
   #toast {
     position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0)); transform: translateX(-50%);
     background: var(--ink); color: var(--bg); padding: 12px 20px; border-radius: 99px; font-weight: 600;
-    opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 50; max-width: 90vw; text-align: center;
+    opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 200; max-width: 90vw; text-align: center;
   }
   #toast.on { opacity: 1; }
 
@@ -241,7 +368,7 @@
         </button>
         <div class="pop" id="menuExp" hidden>
           <button data-x="simples"><b>Planilha</b><span>Modelo da folha de lavagem, uma aba por dia, com horário</span></button>
-          <button data-x="graficos"><b>Planilha com gráficos</b><span>Resumo, tabelas, registros e os 4 gráficos como imagem</span></button>
+          <button data-x="graficos"><b>Planilha com gráficos</b><span>Resumo, tabelas, registros e os 3 gráficos como imagem</span></button>
         </div>
       </div>
     </div>
@@ -252,7 +379,6 @@
 <div id="toast"></div>
 
 <script>
-  // ---------- Configuração ----------
   const DB = "https://controle-de-lavagens-78b2e-default-rtdb.firebaseio.com";
   const EQUIPE = { Felipe: "#0f766e", Marcos: "#be185d", Jonathan: "#4338ca" };
   const TIPOS = { novo: "Carro novo", of: "Oficina", teste: "Test drive", show: "Showroom" };
@@ -261,10 +387,17 @@
   const nomes = Object.keys(EQUIPE);
   const chavesTipos = Object.keys(TIPOS);
   const TEMA_CLARO = { texto: "#33424e", grade: "#dde3e8", ink: "#0f2230" };
-  const HORA_VIRADA = 20; // após 20:00, o "hoje" já é o dia seguinte
+  const HORA_VIRADA = 20;
 
-  // ---------- Estado ----------
-  let periodo = "trinta";
+  const CORES = ["Branco","Preto","Prata","Cinza","Azul","Vermelho","Vinho","Verde","Amarelo","Laranja","Marrom","Bege","Dourado"];
+  const COR_VISUAL = {
+    "Branco": "#ffffff", "Preto": "#111111", "Prata": "#c0c0c0", "Cinza": "#6b7280",
+    "Azul": "#2563eb", "Vermelho": "#dc2626", "Vinho": "#7f1d1d", "Verde": "#16a34a",
+    "Amarelo": "#facc15", "Laranja": "#f97316", "Marrom": "#78350f", "Bege": "#e7d3b3",
+    "Dourado": "#b8860b"
+  };
+
+  let periodo = "hoje";
   let bruto = null;
   let erro = "";
   let carregando = true;
@@ -272,7 +405,6 @@
   let graficos = [];
   let exportando = false;
 
-  // ---------- Utilidades ----------
   const $ = (seletor) => document.querySelector(seletor);
 
   function iso(d) {
@@ -280,7 +412,6 @@
     const dia = String(d.getDate()).padStart(2, "0");
     return d.getFullYear() + "-" + mes + "-" + dia;
   }
-  // Data de hoje considerando a virada às 20:00
   function hojeOperacional() {
     const d = new Date();
     if (d.getHours() >= HORA_VIRADA) d.setDate(d.getDate() + 1);
@@ -311,7 +442,6 @@
     toast.timer = setTimeout(() => t.classList.remove("on"), 2600);
   }
 
-  // ---------- Pequenos blocos de interface ----------
   function avatar(nome) {
     return `<span class="avatar" style="--cor:${EQUIPE[nome]}">${nome.charAt(0)}</span>`;
   }
@@ -344,7 +474,6 @@
     requestAnimationFrame(passo);
   }
 
-  // ---------- Banco de dados ----------
   async function buscar(caminho) {
     let resposta;
     try {
@@ -353,7 +482,7 @@
       throw new Error("Sem conexão com o banco de dados. Verifique a internet.");
     }
     if (resposta.status === 401 || resposta.status === 403) {
-      throw new Error("O banco recusou a leitura. Confira as regras do Firebase (lavagens e showroom com .read: true).");
+      throw new Error("O banco recusou a leitura. Confira as regras do Firebase.");
     }
     if (!resposta.ok) throw new Error("Erro do banco de dados (" + resposta.status + ").");
     return (await resposta.json()) || {};
@@ -376,7 +505,6 @@
     render();
   }
 
-  // ---------- Cálculos ----------
   function inicioDoPeriodo() {
     const d = new Date();
     if (d.getHours() >= HORA_VIRADA) d.setDate(d.getDate() + 1);
@@ -386,20 +514,17 @@
     if (periodo === "mes") { d.setDate(1); return iso(d); }
     return "0000-00-00";
   }
-
   function intervaloTexto() {
     const inicio = inicioDoPeriodo();
     const fim = brData(hojeOperacional());
     return inicio === "0000-00-00" ? "até " + fim : brData(inicio) + " a " + fim;
   }
-
   function analisar() {
     const inicio = inicioDoPeriodo();
     const pessoas = {};
     nomes.forEach((n) => {
       pessoas[n] = { total: 0, tipos: { novo: 0, of: 0, teste: 0, show: 0 }, dias: {}, idas: 0 };
     });
-
     const diasGeral = {};
     let totalCarros = 0;
     for (const [dia, registros] of Object.entries(bruto.lavagens)) {
@@ -416,7 +541,6 @@
         totalCarros++;
       }
     }
-
     const idasPorDia = {};
     let totalIdas = 0;
     for (const [dia, registros] of Object.entries(bruto.showroom)) {
@@ -433,7 +557,6 @@
     return { pessoas, diasGeral, idasPorDia, totalCarros, totalIdas };
   }
 
-  // ---------- Gráficos ----------
   const fundoBranco = {
     id: "fundoBranco",
     beforeDraw(chart) {
@@ -445,13 +568,11 @@
       c.restore();
     }
   };
-
   function temaAtual() {
     const css = getComputedStyle(document.documentElement);
     const v = (nome) => css.getPropertyValue(nome).trim();
     return { texto: v("--mut") || TEMA_CLARO.texto, grade: v("--line") || TEMA_CLARO.grade, ink: v("--ink") || TEMA_CLARO.ink };
   }
-
   function montarConfigs(A, tema, paraImagem) {
     const base = {
       responsive: !paraImagem,
@@ -463,7 +584,6 @@
       plugins: { legend: { labels: { usePointStyle: true, boxWidth: 8, color: tema.texto } } }
     };
     if (paraImagem) base.devicePixelRatio = 1;
-
     const eixoY = { beginAtZero: true, ticks: { precision: 0 } };
     const semGrade = { grid: { display: false } };
 
@@ -472,105 +592,56 @@
       data: {
         labels: nomes,
         datasets: chavesTipos.map((k) => ({
-          label: TIPOS[k],
-          data: nomes.map((n) => A.pessoas[n].tipos[k]),
-          backgroundColor: COR_TIPO[k],
-          borderRadius: 3,
-          borderSkipped: false
+          label: TIPOS[k], data: nomes.map((n) => A.pessoas[n].tipos[k]),
+          backgroundColor: COR_TIPO[k], borderRadius: 3, borderSkipped: false
         }))
       },
       options: { ...base, scales: { x: { stacked: true, ...semGrade }, y: { ...eixoY, stacked: true } } }
     };
-
     const mix = {
       type: "doughnut",
       data: {
         labels: chavesTipos.map((k) => TIPOS[k]),
         datasets: [{
           data: chavesTipos.map((k) => nomes.reduce((s, n) => s + A.pessoas[n].tipos[k], 0)),
-          backgroundColor: chavesTipos.map((k) => COR_TIPO[k]),
-          borderWidth: 0
+          backgroundColor: chavesTipos.map((k) => COR_TIPO[k]), borderWidth: 0
         }]
       },
-      options: {
-        ...base,
-        cutout: "62%",
-        plugins: { legend: { position: "bottom", labels: { usePointStyle: true, boxWidth: 8, color: tema.texto } } }
-      }
+      options: { ...base, cutout: "62%", plugins: { legend: { position: "bottom", labels: { usePointStyle: true, boxWidth: 8, color: tema.texto } } } }
     };
-
-    const dias = Object.keys(A.diasGeral).sort();
-    const dias_ = {
-      type: "line",
-      data: {
-        labels: dias.map(fmtDiaCurto),
-        datasets: nomes.map((n) => ({
-          label: n,
-          data: dias.map((d) => A.diasGeral[d].porPessoa[n] || 0),
-          borderColor: EQUIPE[n],
-          backgroundColor: EQUIPE[n],
-          borderWidth: 2.5,
-          pointRadius: 3,
-          tension: 0.3
-        })).concat([{
-          label: "Total",
-          data: dias.map((d) => A.diasGeral[d].total),
-          borderColor: tema.ink,
-          backgroundColor: tema.ink,
-          borderWidth: 2,
-          borderDash: [6, 4],
-          pointRadius: 0,
-          tension: 0.3
-        }])
-      },
-      options: { ...base, scales: { x: semGrade, y: eixoY } }
-    };
-
     const idas = {
       type: "bar",
       data: {
         labels: nomes,
         datasets: [{
-          label: "Idas ao showroom",
-          data: nomes.map((n) => A.pessoas[n].idas),
-          backgroundColor: nomes.map((n) => EQUIPE[n]),
-          borderRadius: 8,
-          borderSkipped: false
+          label: "Idas ao showroom", data: nomes.map((n) => A.pessoas[n].idas),
+          backgroundColor: nomes.map((n) => EQUIPE[n]), borderRadius: 8, borderSkipped: false
         }]
       },
       options: { ...base, plugins: { legend: { display: false } }, scales: { x: semGrade, y: eixoY } }
     };
-
-    const configs = { tipos, mix, dias: dias_, idas };
+    const configs = { tipos, mix, idas };
     if (paraImagem) Object.values(configs).forEach((c) => { c.plugins = [fundoBranco]; });
     return configs;
   }
-
-  function destruirGraficos() {
-    graficos.forEach((g) => g.destroy());
-    graficos = [];
-  }
-
+  function destruirGraficos() { graficos.forEach((g) => g.destroy()); graficos = []; }
   function criarGraficos(A) {
     if (typeof Chart === "undefined") return;
     const configs = montarConfigs(A, temaAtual(), false);
-    [["gTipos", "tipos"], ["gMix", "mix"], ["gDias", "dias"], ["gIdas", "idas"]].forEach(([id, chave]) => {
+    [["gTipos", "tipos"], ["gMix", "mix"], ["gIdas", "idas"]].forEach(([id, chave]) => {
       graficos.push(new Chart($("#" + id), configs[chave]));
     });
   }
-
   function imagensDosGraficos(A) {
     const configs = montarConfigs(A, TEMA_CLARO, true);
     const lista = [
       ["tipos", "Carros por colaborador e tipo"],
       ["mix", "Mistura por tipo (geral)"],
-      ["dias", "Carros por dia"],
       ["idas", "Idas ao showroom por colaborador"]
     ];
     return lista.map(([chave, titulo]) => {
       const canvas = document.createElement("canvas");
-      canvas.width = 1400;
-      canvas.height = 640;
+      canvas.width = 1400; canvas.height = 640;
       const grafico = new Chart(canvas, configs[chave]);
       const dados = grafico.toBase64Image("image/png", 1);
       grafico.destroy();
@@ -578,15 +649,14 @@
     });
   }
 
-  // ---------- Planilha (.xlsx) ----------
   function listarRegistros(origem) {
     const inicio = inicioDoPeriodo();
     const saida = [];
     for (const [dia, registros] of Object.entries(origem)) {
       if (dia < inicio) continue;
-      for (const r of Object.values(registros || {})) {
+      for (const [id, r] of Object.entries(registros || {})) {
         if (EQUIPE[r.nome] === undefined) continue;
-        saida.push({ dia, ...r });
+        saida.push({ dia, id, ...r });
       }
     }
     return saida.sort((a, b) => a.ts - b.ts);
@@ -597,14 +667,10 @@
     const wb = new ExcelJS.Workbook();
     wb.creator = "Painel da Lavagem";
     wb.created = new Date();
-
     const PETROLEO = "FF0A3D52";
     const borda = { style: "thin", color: { argb: "FFD0D7DD" } };
     const bordas = { top: borda, left: borda, bottom: borda, right: borda };
-    const dataExcel = (dia) => {
-      const [a, m, d] = dia.split("-").map(Number);
-      return new Date(Date.UTC(a, m - 1, d));
-    };
+    const dataExcel = (dia) => { const [a, m, d] = dia.split("-").map(Number); return new Date(Date.UTC(a, m - 1, d)); };
     function cabecalho(linha) {
       linha.height = 24;
       linha.eachCell((c) => {
@@ -615,10 +681,7 @@
       });
     }
     function corpo(linha, negrito) {
-      linha.eachCell((c) => {
-        c.border = bordas;
-        if (negrito) c.font = { bold: true };
-      });
+      linha.eachCell((c) => { c.border = bordas; if (negrito) c.font = { bold: true }; });
     }
 
     const mapaGeral = {};
@@ -627,7 +690,6 @@
     const tiposGeral = {};
     chavesTipos.forEach((k) => { tiposGeral[k] = nomes.reduce((s, n) => s + A.pessoas[n].tipos[k], 0); });
 
-    // --- Aba Resumo ---
     const r = wb.addWorksheet("Resumo", { views: [{ showGridLines: false }] });
     r.columns = [28, 14, 14, 14, 14, 12, 10, 12, 22, 16].map((width) => ({ width }));
     r.mergeCells("A1:J1");
@@ -636,7 +698,6 @@
     r.getCell("A2").value = "Período: " + PERIODOS[periodo] + " (" + intervaloTexto() + ")";
     r.getCell("A3").value = "Gerado em " + new Date().toLocaleString("pt-BR");
     r.getCell("A3").font = { color: { argb: "FF5B6B78" } };
-
     r.addRow([]);
     cabecalho(r.addRow(["Indicador", "Valor"]));
     [
@@ -646,12 +707,10 @@
       ["Melhor dia (geral)", melhorDia(mapaGeral)],
       ["Idas ao showroom", A.totalIdas]
     ].forEach((linha) => {
-      const l = r.addRow(linha);
-      corpo(l);
+      const l = r.addRow(linha); corpo(l);
       l.getCell(2).alignment = { horizontal: "right" };
       if (linha[0] === "Média geral por dia") l.getCell(2).numFmt = "0.0";
     });
-
     r.addRow([]);
     const cab = r.addRow(["Colaborador", ...chavesTipos.map((k) => TIPOS[k]), "Total", "Dias", "Média/dia", "Melhor dia", "Idas showroom"]);
     cabecalho(cab);
@@ -659,16 +718,13 @@
       const p = A.pessoas[n];
       const nDias = Object.keys(p.dias).length;
       const l = r.addRow([n, ...chavesTipos.map((k) => p.tipos[k]), p.total, nDias, mediaNum(p.total, nDias), melhorDia(p.dias), p.idas]);
-      corpo(l);
-      l.getCell(8).numFmt = "0.0";
+      corpo(l); l.getCell(8).numFmt = "0.0";
     });
     const geral = r.addRow(["Geral", ...chavesTipos.map((k) => tiposGeral[k]), A.totalCarros, diasComLavagem,
       mediaNum(A.totalCarros, diasComLavagem), melhorDia(mapaGeral), A.totalIdas]);
-    corpo(geral, true);
-    geral.getCell(8).numFmt = "0.0";
+    corpo(geral, true); geral.getCell(8).numFmt = "0.0";
     geral.eachCell((c) => { c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE8EEF2" } }; });
 
-    // --- Aba Gráficos (opcional) ---
     if (comGraficos) {
       const g = wb.addWorksheet("Gráficos", { views: [{ showGridLines: false }] });
       let topo = 1;
@@ -681,7 +737,6 @@
       });
     }
 
-    // --- Aba Por dia ---
     const porDia = wb.addWorksheet("Por dia", { views: [{ state: "frozen", ySplit: 1 }] });
     porDia.columns = [14, 12, 12, 12, 10, 16].map((width) => ({ width }));
     cabecalho(porDia.addRow(["Data", ...nomes, "Total", "Idas showroom"]));
@@ -692,46 +747,39 @@
         ? nomes.reduce((s, n) => s + (A.idasPorDia[dia][n] ? A.idasPorDia[dia][n].length : 0), 0)
         : 0;
       const l = porDia.addRow([dataExcel(dia), ...nomes.map((n) => g.porPessoa[n] || 0), g.total, idasDia]);
-      corpo(l);
-      l.getCell(1).numFmt = "dd/mm/yyyy";
+      corpo(l); l.getCell(1).numFmt = "dd/mm/yyyy";
     });
 
-    // --- Aba Registros ---
     const reg = wb.addWorksheet("Registros", { views: [{ state: "frozen", ySplit: 1 }] });
-    reg.columns = [14, 10, 16, 16, 24, 16].map((width) => ({ width }));
-    cabecalho(reg.addRow(["Data", "Hora", "Colaborador", "Tipo", "Carro", "Placa/Chassi (4 últimos)"]));
+    reg.columns = [14, 10, 16, 16, 24, 16, 14].map((width) => ({ width }));
+    cabecalho(reg.addRow(["Data", "Hora", "Colaborador", "Tipo", "Carro", "Placa/Chassi", "Cor"]));
     listarRegistros(bruto.lavagens).forEach((x) => {
-      const l = reg.addRow([dataExcel(x.dia), hora(x.ts), x.nome, TIPOS[x.tipo] || x.tipo, x.carro || "", String(x.placa || "")]);
+      const l = reg.addRow([dataExcel(x.dia), hora(x.ts), x.nome, TIPOS[x.tipo] || x.tipo, x.carro || "", String(x.placa || ""), x.cor || ""]);
       corpo(l);
       l.getCell(1).numFmt = "dd/mm/yyyy";
       l.getCell(6).numFmt = "@";
     });
-    reg.autoFilter = { from: "A1", to: "F1" };
+    reg.autoFilter = { from: "A1", to: "G1" };
 
-    // --- Aba Showroom ---
     const sh = wb.addWorksheet("Showroom", { views: [{ state: "frozen", ySplit: 1 }] });
     sh.columns = [14, 10, 16].map((width) => ({ width }));
     cabecalho(sh.addRow(["Data", "Hora", "Colaborador"]));
     listarRegistros(bruto.showroom).forEach((x) => {
       const l = sh.addRow([dataExcel(x.dia), hora(x.ts), x.nome]);
-      corpo(l);
-      l.getCell(1).numFmt = "dd/mm/yyyy";
+      corpo(l); l.getCell(1).numFmt = "dd/mm/yyyy";
     });
     sh.autoFilter = { from: "A1", to: "C1" };
 
     return wb.xlsx.writeBuffer();
   }
 
-  // Planilha no modelo da folha de lavagem impressa, agora com VEICULO preenchido
   async function gerarPlanilhaDiaria() {
     const wb = new ExcelJS.Workbook();
     wb.creator = "Painel da Lavagem";
     wb.created = new Date();
-
     const preto = { style: "thin", color: { argb: "FF000000" } };
     const bordas = { top: preto, left: preto, bottom: preto, right: preto };
     const LINHAS_MINIMAS = 15;
-
     const porDia = {};
     listarRegistros(bruto.lavagens).forEach((x) => {
       (porDia[x.dia] = porDia[x.dia] || []).push(x);
@@ -744,25 +792,21 @@
       const total = Math.max(LINHAS_MINIMAS, registros.length);
       const ws = wb.addWorksheet(dia.split("-").reverse().join("-"), {
         pageSetup: {
-          paperSize: 9,
-          orientation: "portrait",
-          fitToPage: true,
-          fitToWidth: 1,
-          fitToHeight: 0,
-          horizontalCentered: true,
+          paperSize: 9, orientation: "portrait",
+          fitToPage: true, fitToWidth: 1, fitToHeight: 0, horizontalCentered: true,
           margins: { left: 0.5, right: 0.5, top: 0.6, bottom: 0.6, header: 0.3, footer: 0.3 }
         }
       });
-      ws.columns = [6, 26, 22, 20, 22, 12].map((width) => ({ width }));
+      // Ordem: Nº | VEICULO | CHASSI | COR | SETOR | LAVADOR | HORÁRIO
+      ws.columns = [6, 24, 14, 14, 20, 22, 12].map((width) => ({ width }));
 
-      // Linha 1: título (A:D) e data (E:F)
       ws.mergeCells("A1:D1");
-      ws.mergeCells("E1:F1");
+      ws.mergeCells("E1:G1");
       ws.getCell("A1").value = "PLANILHA DE LAVAGEM";
       ws.getCell("E1").value = "DATA: " + dia.split("-").reverse().join(" / ");
       const l1 = ws.getRow(1);
       l1.height = 30;
-      for (let c = 1; c <= 6; c++) {
+      for (let c = 1; c <= 7; c++) {
         const cel = l1.getCell(c);
         cel.border = bordas;
         cel.alignment = { horizontal: "center", vertical: "middle" };
@@ -770,10 +814,9 @@
       ws.getCell("A1").font = { bold: true, size: 15 };
       ws.getCell("E1").font = { bold: true, size: 12 };
 
-      // Linha 2: cabeçalho das colunas
       const l2 = ws.getRow(2);
       l2.height = 24;
-      ["", "VEICULO", "CHASSI", "SETOR", "LAVADOR", "HORÁRIO"].forEach((texto, i) => {
+      ["", "VEICULO", "CHASSI", "COR", "SETOR", "LAVADOR", "HORÁRIO"].forEach((texto, i) => {
         const cel = l2.getCell(i + 1);
         cel.value = texto;
         cel.font = { bold: true, size: 12 };
@@ -781,7 +824,6 @@
         cel.alignment = { horizontal: "center", vertical: "middle" };
       });
 
-      // Linhas numeradas
       for (let i = 0; i < total; i++) {
         const x = registros[i];
         const linha = ws.getRow(3 + i);
@@ -790,6 +832,7 @@
           i + 1,
           x ? (x.carro || "") : "",
           x ? String(x.placa || "") : "",
+          x ? (x.cor || "") : "",
           x ? (TIPOS[x.tipo] || x.tipo) : "",
           x ? x.nome : "",
           x ? hora(x.ts) : ""
@@ -803,7 +846,7 @@
           if (c === 2) cel.numFmt = "@";
         });
       }
-      ws.pageSetup.printArea = "A1:F" + (2 + total);
+      ws.pageSetup.printArea = "A1:G" + (2 + total);
     });
 
     return wb.xlsx.writeBuffer();
@@ -844,7 +887,6 @@
     $("#exportar").disabled = false;
   }
 
-  // ---------- Tela ----------
   function render() {
     destruirGraficos();
     document.querySelectorAll("#barra [data-p]").forEach((b) => b.classList.toggle("on", b.dataset.p === periodo));
@@ -878,7 +920,6 @@
     const tiposGeral = {};
     chavesTipos.forEach((k) => { tiposGeral[k] = nomes.reduce((s, n) => s + A.pessoas[n].tipos[k], 0); });
 
-    // --- Destaque ---
     const hero = `
       <section class="hero">
         <div>
@@ -894,8 +935,8 @@
         <div class="mixwrap">${barraMix(tiposGeral, false)}${legendaMix(tiposGeral)}</div>
       </section>`;
 
-    // --- Fichas da equipe ---
     const ordem = nomes.slice().sort((a, b) => A.pessoas[b].total - A.pessoas[a].total);
+
     const fichas = ordem.map((n) => {
       const p = A.pessoas[n];
       const nDias = Object.keys(p.dias).length;
@@ -914,38 +955,93 @@
         </article>`;
     }).join("");
 
-    // --- Quem mais lavou de cada tipo ---
     const lideres = chavesTipos.map((k) => {
       const valores = nomes.map((n) => A.pessoas[n].tipos[k]);
       const maximo = Math.max(...valores);
-      const donos = maximo > 0 ? nomes.filter((n, i) => valores[i] === maximo) : [];
+      const total = tiposGeral[k];
+
+      if (maximo === 0) {
+        return `
+          <div class="amostra vazia" style="--c:${COR_TIPO[k]}">
+            <div class="faixa"><span class="bolinha-tipo"></span>${TIPOS[k]}</div>
+            <div class="corpo">— sem registros</div>
+          </div>`;
+      }
+
+      const donos = nomes.filter((n, i) => valores[i] === maximo);
+      const empate = donos.length > 1;
+      const pct = total > 0 ? Math.round((maximo / total) * 100) : 0;
+
+      const blocosLider = donos.map((n) => `
+        <div class="lider">
+          <span class="avatar" style="--cor:${EQUIPE[n]}">${n.charAt(0)}</span>
+          <div class="dados">
+            <div class="nome" style="color:${EQUIPE[n]}">${n}</div>
+            <div class="num"><b>${maximo}</b> ${maximo === 1 ? "carro" : "carros"}</div>
+          </div>
+        </div>`).join("");
+
       return `
         <div class="amostra" style="--c:${COR_TIPO[k]}">
-          <div class="faixa">${TIPOS[k]}</div>
+          <div class="faixa"><span class="bolinha-tipo"></span>${TIPOS[k]}</div>
           <div class="corpo">
-            <div class="quem">${donos.length ? donos.map((n) => avatar(n) + n).join(" ") : "—"}</div>
-            <div class="qtd">${maximo > 0 ? maximo + " de " + tiposGeral[k] + " no total" : "nenhum registro"}</div>
+            ${empate ? `<div class="empate">Empate entre ${donos.length}</div>` : ""}
+            ${blocosLider}
+            <div class="barra"><i style="width:${pct}%"></i></div>
+            <div class="rodape">
+              <span>${maximo} de ${total} no total</span>
+              <span>${pct}%</span>
+            </div>
           </div>
         </div>`;
     }).join("");
 
-    // --- Tabela comparativa ---
-    const linhas = nomes.map((n) => {
+    const compCards = ordem.map((n) => {
       const p = A.pessoas[n];
       const nDias = Object.keys(p.dias).length;
-      return `<tr>
-        <td><span class="ponto" style="--cor:${EQUIPE[n]}"></span><b>${n}</b></td>
-        ${chavesTipos.map((k) => `<td>${p.tipos[k]}</td>`).join("")}
-        <td><b>${p.total}</b></td><td>${nDias}</td><td>${media(p.total, nDias)}</td><td>${melhorDia(p.dias)}</td><td>${p.idas}</td>
-      </tr>`;
+      const posicao = 1 + nomes.filter((x) => A.pessoas[x].total > p.total).length;
+      const linhasTipos = chavesTipos.map((k) => {
+        const v = p.tipos[k];
+        return `
+          <div class="linha">
+            <span class="bolinha" style="background:${COR_TIPO[k]}"></span>
+            <span class="rotulo">${TIPOS[k]}</span>
+            <span class="valor ${v === 0 ? "zero" : ""}">${v}</span>
+          </div>`;
+      }).join("");
+      return `
+        <div class="comp-card">
+          <div class="topo-pessoa">
+            ${avatar(n)}
+            <div>
+              <div class="nome" style="color:${EQUIPE[n]}">${n}</div>
+              <div class="pos">${p.total ? posicao + "º no ranking" : "sem registros"}</div>
+            </div>
+          </div>
+          <div class="total-destaque">
+            <span class="numero" style="color:${EQUIPE[n]}">${p.total}</span>
+            <span class="rotulo">${p.total === 1 ? "carro no total" : "carros no total"}</span>
+          </div>
+          <div class="tipos-lista">${linhasTipos}</div>
+          <div class="extras">
+            <div><span class="rotulo">Dias trabalhados</span><span class="valor">${nDias}</span></div>
+            <div><span class="rotulo">Média por dia</span><span class="valor">${media(p.total, nDias)}</span></div>
+            <div><span class="rotulo">Melhor dia</span><span class="valor">${melhorDia(p.dias)}</span></div>
+            <div><span class="rotulo">Idas ao showroom</span><span class="valor">${p.idas}</span></div>
+          </div>
+        </div>`;
     }).join("");
-    const linhaGeral = `<tr class="geral">
-      <td>Geral</td>
-      ${chavesTipos.map((k) => `<td>${tiposGeral[k]}</td>`).join("")}
-      <td>${A.totalCarros}</td><td>${diasComLavagem}</td><td>${media(A.totalCarros, diasComLavagem)}</td><td>${melhorDia(mapaGeral)}</td><td>${A.totalIdas}</td>
-    </tr>`;
 
-    // --- Melhores dias ---
+    const geralFaixa = `
+      <div class="geral-faixa">
+        <h3>Geral</h3>
+        <div class="item"><span class="rotulo">Total</span><span class="valor">${A.totalCarros}</span></div>
+        <div class="item"><span class="rotulo">Dias</span><span class="valor">${diasComLavagem}</span></div>
+        <div class="item"><span class="rotulo">Média/dia</span><span class="valor">${media(A.totalCarros, diasComLavagem)}</span></div>
+        <div class="item"><span class="rotulo">Melhor dia</span><span class="valor">${melhorDia(mapaGeral)}</span></div>
+        <div class="item"><span class="rotulo">Idas showroom</span><span class="valor">${A.totalIdas}</span></div>
+      </div>`;
+
     const maxGeral = Math.max(...Object.values(mapaGeral), 1);
     const topGeral = ordenarDias(mapaGeral).slice(0, 5).map(([dia, n], i) => `
       <div class="rk" style="--cor:var(--accent)">
@@ -970,7 +1066,6 @@
         </div>`;
     }).join("");
 
-    // --- Idas ao showroom ---
     const diasIda = Object.keys(A.idasPorDia).sort().reverse();
     const listaIda = diasIda.length
       ? diasIda.map((dia) => {
@@ -988,24 +1083,19 @@
       <div class="equipe">${fichas}</div>
 
       <h2>Quem mais lavou de cada tipo</h2>
-      <p class="nota">O líder de cada categoria e quanto ele fez do total.</p>
+      <p class="nota">O líder de cada categoria e quanto ele representa do total daquele tipo.</p>
       <div class="amostras">${lideres}</div>
 
       <h2>Comparativo</h2>
-      <p class="nota">Média por dia = carros divididos pelos dias em que a pessoa lavou pelo menos um carro. Na linha Geral, são os dias em que alguém lavou.</p>
-      <div class="painel rolagem">
-        <table>
-          <thead><tr><th>Colaborador</th>${chavesTipos.map((k) => `<th>${TIPOS[k]}</th>`).join("")}<th>Total</th><th>Dias</th><th>Média/dia</th><th>Melhor dia</th><th>Idas showroom</th></tr></thead>
-          <tbody>${linhas}${linhaGeral}</tbody>
-        </table>
-      </div>
+      <p class="nota">Um card por colaborador, com os tipos, os dias trabalhados e a média por dia. No fim, a faixa Geral soma toda a equipe.</p>
+      <div class="comparativo">${compCards}</div>
+      ${geralFaixa}
 
       <h2>Gráficos</h2>
       <p class="nota" style="margin-bottom:14px">Os mesmos gráficos podem ir para a planilha pelo botão Exportar.</p>
       <div class="grid2">
         <div class="painel"><h3>Carros por colaborador e tipo</h3><div class="graf"><canvas id="gTipos"></canvas></div></div>
         <div class="painel"><h3>Mistura por tipo</h3><div class="graf"><canvas id="gMix"></canvas></div></div>
-        <div class="painel grande-col"><h3>Carros por dia</h3><div class="graf"><canvas id="gDias"></canvas></div></div>
         <div class="painel"><h3>Idas ao showroom por colaborador</h3><div class="graf"><canvas id="gIdas"></canvas></div></div>
       </div>
 
@@ -1024,7 +1114,6 @@
     animarNumero($("#numHero"));
   }
 
-  // ---------- Eventos ----------
   document.querySelectorAll("#barra [data-p]").forEach((b) => {
     b.onclick = () => { periodo = b.dataset.p; render(); };
   });
@@ -1040,7 +1129,6 @@
 
   carregar();
 
-  // Recarrega o painel quando virar a hora (20:00)
   let diaAtualVisivel = hojeOperacional();
   setInterval(() => {
     const novoDia = hojeOperacional();
