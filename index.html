@@ -381,8 +381,8 @@
 <script>
   const DB = "https://controle-de-lavagens-78b2e-default-rtdb.firebaseio.com";
   const EQUIPE = { Felipe: "#0f766e", Marcos: "#be185d", Jonathan: "#4338ca" };
-  const TIPOS = { novo: "Carro novo", of: "Oficina", teste: "Test drive", show: "Showroom" };
-  const COR_TIPO = { novo: "#1b7f4b", of: "#b3382c", teste: "#b86e00", show: "#1f5fbf" };
+  const TIPOS = { novo: "Carro novo", of: "Oficina", teste: "Test drive", show: "Showroom", outros: "Outros" };
+  const COR_TIPO = { novo: "#1b7f4b", of: "#b3382c", teste: "#b86e00", show: "#1f5fbf", outros: "#6b7280" };
   const PERIODOS = { hoje: "Hoje", sete: "Últimos 7 dias", trinta: "Últimos 30 dias", mes: "Este mês", tudo: "Todo o histórico" };
   const nomes = Object.keys(EQUIPE);
   const chavesTipos = Object.keys(TIPOS);
@@ -523,7 +523,7 @@
     const inicio = inicioDoPeriodo();
     const pessoas = {};
     nomes.forEach((n) => {
-      pessoas[n] = { total: 0, tipos: { novo: 0, of: 0, teste: 0, show: 0 }, dias: {}, idas: 0 };
+      pessoas[n] = { total: 0, tipos: { novo: 0, of: 0, teste: 0, show: 0, outros: 0 }, dias: {}, idas: 0 };
     });
     const diasGeral = {};
     let totalCarros = 0;
@@ -691,8 +691,8 @@
     chavesTipos.forEach((k) => { tiposGeral[k] = nomes.reduce((s, n) => s + A.pessoas[n].tipos[k], 0); });
 
     const r = wb.addWorksheet("Resumo", { views: [{ showGridLines: false }] });
-    r.columns = [28, 14, 14, 14, 14, 12, 10, 12, 22, 16].map((width) => ({ width }));
-    r.mergeCells("A1:J1");
+    r.columns = [28, 14, 14, 14, 14, 14, 12, 10, 12, 22, 16].map((width) => ({ width }));
+    r.mergeCells("A1:K1");
     r.getCell("A1").value = "Painel da Lavagem";
     r.getCell("A1").font = { bold: true, size: 20, color: { argb: PETROLEO } };
     r.getCell("A2").value = "Período: " + PERIODOS[periodo] + " (" + intervaloTexto() + ")";
@@ -718,11 +718,14 @@
       const p = A.pessoas[n];
       const nDias = Object.keys(p.dias).length;
       const l = r.addRow([n, ...chavesTipos.map((k) => p.tipos[k]), p.total, nDias, mediaNum(p.total, nDias), melhorDia(p.dias), p.idas]);
-      corpo(l); l.getCell(8).numFmt = "0.0";
+      corpo(l);
+      // Coluna do total fica em (1 + chavesTipos.length + 1) = 7
+      l.getCell(1 + chavesTipos.length + 2).numFmt = "0.0";
     });
     const geral = r.addRow(["Geral", ...chavesTipos.map((k) => tiposGeral[k]), A.totalCarros, diasComLavagem,
       mediaNum(A.totalCarros, diasComLavagem), melhorDia(mapaGeral), A.totalIdas]);
-    corpo(geral, true); geral.getCell(8).numFmt = "0.0";
+    corpo(geral, true);
+    geral.getCell(1 + chavesTipos.length + 2).numFmt = "0.0";
     geral.eachCell((c) => { c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE8EEF2" } }; });
 
     if (comGraficos) {
