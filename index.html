@@ -380,7 +380,12 @@
 
 <script>
   const DB = "https://controle-de-lavagens-78b2e-default-rtdb.firebaseio.com";
-  const EQUIPE = { Felipe: "#0f766e", Marcos: "#be185d", Jonathan: "#4338ca" };
+  const EQUIPE = {
+    Felipe: "#0f766e",
+    Marcos: "#be185d",
+    Jonathan: "#4338ca",
+    Ridelvan: "#c2410c"
+  };
   const TIPOS = { novo: "Carro novo", of: "Oficina", teste: "Test drive", show: "Showroom", outros: "Outros" };
   const COR_TIPO = { novo: "#1b7f4b", of: "#b3382c", teste: "#b86e00", show: "#1f5fbf", outros: "#6b7280" };
   const PERIODOS = { hoje: "Hoje", sete: "Últimos 7 dias", trinta: "Últimos 30 dias", mes: "Este mês", tudo: "Todo o histórico" };
@@ -523,10 +528,19 @@
     const inicio = inicioDoPeriodo();
     const pessoas = {};
     nomes.forEach((n) => {
-      pessoas[n] = { total: 0, tipos: { novo: 0, of: 0, teste: 0, show: 0, outros: 0 }, dias: {}, idas: 0 };
+      pessoas[n] = {
+        total: 0,
+        tipos: { novo: 0, of: 0, teste: 0, show: 0, outros: 0 },
+        foraListagem: 0,
+        substituido: 0,
+        dias: {},
+        idas: 0
+      };
     });
     const diasGeral = {};
     let totalCarros = 0;
+    let totalFora = 0;
+    let totalSubs = 0;
     for (const [dia, registros] of Object.entries(bruto.lavagens)) {
       if (dia < inicio) continue;
       for (const r of Object.values(registros || {})) {
@@ -534,6 +548,8 @@
         if (!p) continue;
         p.total++;
         if (p.tipos[r.tipo] !== undefined) p.tipos[r.tipo]++;
+        if (r.foraListagem) { p.foraListagem++; totalFora++; }
+        if (r.substituido)  { p.substituido++;  totalSubs++; }
         p.dias[dia] = (p.dias[dia] || 0) + 1;
         const g = diasGeral[dia] || (diasGeral[dia] = { total: 0, porPessoa: {} });
         g.total++;
@@ -554,7 +570,7 @@
         (d[r.nome] = d[r.nome] || []).push(r.ts);
       }
     }
-    return { pessoas, diasGeral, idasPorDia, totalCarros, totalIdas };
+    return { pessoas, diasGeral, idasPorDia, totalCarros, totalIdas, totalFora, totalSubs };
   }
 
   const fundoBranco = {
@@ -691,8 +707,8 @@
     chavesTipos.forEach((k) => { tiposGeral[k] = nomes.reduce((s, n) => s + A.pessoas[n].tipos[k], 0); });
 
     const r = wb.addWorksheet("Resumo", { views: [{ showGridLines: false }] });
-    r.columns = [28, 14, 14, 14, 14, 14, 12, 10, 12, 22, 16].map((width) => ({ width }));
-    r.mergeCells("A1:K1");
+    r.columns = [28, 14, 14, 14, 14, 14, 12, 10, 12, 22, 16, 14, 14].map((width) => ({ width }));
+    r.mergeCells("A1:M1");
     r.getCell("A1").value = "Painel da Lavagem";
     r.getCell("A1").font = { bold: true, size: 20, color: { argb: PETROLEO } };
     r.getCell("A2").value = "Período: " + PERIODOS[periodo] + " (" + intervaloTexto() + ")";
@@ -705,27 +721,28 @@
       ["Dias com lavagem", diasComLavagem],
       ["Média geral por dia", mediaNum(A.totalCarros, diasComLavagem)],
       ["Melhor dia (geral)", melhorDia(mapaGeral)],
-      ["Idas ao showroom", A.totalIdas]
+      ["Idas ao showroom", A.totalIdas],
+      ["Carros fora da listagem", A.totalFora],
+      ["Carros substituídos", A.totalSubs]
     ].forEach((linha) => {
       const l = r.addRow(linha); corpo(l);
       l.getCell(2).alignment = { horizontal: "right" };
       if (linha[0] === "Média geral por dia") l.getCell(2).numFmt = "0.0";
     });
     r.addRow([]);
-    const cab = r.addRow(["Colaborador", ...chavesTipos.map((k) => TIPOS[k]), "Total", "Dias", "Média/dia", "Melhor dia", "Idas showroom"]);
+    const cab = r.addRow(["Colaborador", ...chavesTipos.map((k) => TIPOS[k]), "Total", "Dias", "Média/dia", "Melhor dia", "Idas showroom", "Fora listagem", "Substituído"]);
     cabecalho(cab);
     nomes.forEach((n) => {
       const p = A.pessoas[n];
       const nDias = Object.keys(p.dias).length;
-      const l = r.addRow([n, ...chavesTipos.map((k) => p.tipos[k]), p.total, nDias, mediaNum(p.total, nDias), melhorDia(p.dias), p.idas]);
+      const l = r.addRow([n, ...chavesTipos.map((k) => p.tipos[k]), p.total, nDias, mediaNum(p.total, nDias), melhorDia(p.dias), p.idas, p.foraListagem, p.substituido]);
       corpo(l);
-      // Coluna do total fica em (1 + chavesTipos.length + 1) = 7
-      l.getCell(1 + chavesTipos.length + 2).numFmt = "0.0";
+      l.getCell(1 + chavesTipos.length + 3).numFmt = "0.0";
     });
     const geral = r.addRow(["Geral", ...chavesTipos.map((k) => tiposGeral[k]), A.totalCarros, diasComLavagem,
-      mediaNum(A.totalCarros, diasComLavagem), melhorDia(mapaGeral), A.totalIdas]);
+      mediaNum(A.totalCarros, diasComLavagem), melhorDia(mapaGeral), A.totalIdas, A.totalFora, A.totalSubs]);
     corpo(geral, true);
-    geral.getCell(1 + chavesTipos.length + 2).numFmt = "0.0";
+    geral.getCell(1 + chavesTipos.length + 3).numFmt = "0.0";
     geral.eachCell((c) => { c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE8EEF2" } }; });
 
     if (comGraficos) {
@@ -754,15 +771,20 @@
     });
 
     const reg = wb.addWorksheet("Registros", { views: [{ state: "frozen", ySplit: 1 }] });
-    reg.columns = [14, 10, 16, 16, 24, 16, 14].map((width) => ({ width }));
-    cabecalho(reg.addRow(["Data", "Hora", "Colaborador", "Tipo", "Carro", "Placa/Chassi", "Cor"]));
+    reg.columns = [14, 10, 16, 16, 24, 16, 14, 16, 14].map((width) => ({ width }));
+    cabecalho(reg.addRow(["Data", "Hora", "Colaborador", "Tipo", "Carro", "Placa/Chassi", "Cor", "Fora da listagem", "Substituído"]));
     listarRegistros(bruto.lavagens).forEach((x) => {
-      const l = reg.addRow([dataExcel(x.dia), hora(x.ts), x.nome, TIPOS[x.tipo] || x.tipo, x.carro || "", String(x.placa || ""), x.cor || ""]);
+      const l = reg.addRow([
+        dataExcel(x.dia), hora(x.ts), x.nome, TIPOS[x.tipo] || x.tipo,
+        x.carro || "", String(x.placa || ""), x.cor || "",
+        x.foraListagem ? "Sim" : "",
+        x.substituido ? "Sim" : ""
+      ]);
       corpo(l);
       l.getCell(1).numFmt = "dd/mm/yyyy";
       l.getCell(6).numFmt = "@";
     });
-    reg.autoFilter = { from: "A1", to: "G1" };
+    reg.autoFilter = { from: "A1", to: "I1" };
 
     const sh = wb.addWorksheet("Showroom", { views: [{ state: "frozen", ySplit: 1 }] });
     sh.columns = [14, 10, 16].map((width) => ({ width }));
@@ -800,31 +822,30 @@
           margins: { left: 0.5, right: 0.5, top: 0.6, bottom: 0.6, header: 0.3, footer: 0.3 }
         }
       });
-      // Ordem: Nº | VEICULO | CHASSI | COR | SETOR | LAVADOR | HORÁRIO
-      ws.columns = [6, 24, 14, 14, 20, 22, 12].map((width) => ({ width }));
+      ws.columns = [6, 22, 14, 14, 18, 20, 12, 16, 14].map((width) => ({ width }));
 
-      ws.mergeCells("A1:D1");
-      ws.mergeCells("E1:G1");
+      ws.mergeCells("A1:F1");
+      ws.mergeCells("G1:I1");
       ws.getCell("A1").value = "PLANILHA DE LAVAGEM";
-      ws.getCell("E1").value = "DATA: " + dia.split("-").reverse().join(" / ");
+      ws.getCell("G1").value = "DATA: " + dia.split("-").reverse().join(" / ");
       const l1 = ws.getRow(1);
       l1.height = 30;
-      for (let c = 1; c <= 7; c++) {
+      for (let c = 1; c <= 9; c++) {
         const cel = l1.getCell(c);
         cel.border = bordas;
         cel.alignment = { horizontal: "center", vertical: "middle" };
       }
       ws.getCell("A1").font = { bold: true, size: 15 };
-      ws.getCell("E1").font = { bold: true, size: 12 };
+      ws.getCell("G1").font = { bold: true, size: 12 };
 
       const l2 = ws.getRow(2);
       l2.height = 24;
-      ["", "VEICULO", "CHASSI", "COR", "SETOR", "LAVADOR", "HORÁRIO"].forEach((texto, i) => {
+      ["", "VEICULO", "CHASSI", "COR", "SETOR", "LAVADOR", "HORÁRIO", "FORA LISTAGEM", "SUBSTITUÍDO"].forEach((texto, i) => {
         const cel = l2.getCell(i + 1);
         cel.value = texto;
-        cel.font = { bold: true, size: 12 };
+        cel.font = { bold: true, size: 11 };
         cel.border = bordas;
-        cel.alignment = { horizontal: "center", vertical: "middle" };
+        cel.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
       });
 
       for (let i = 0; i < total; i++) {
@@ -838,18 +859,20 @@
           x ? (x.cor || "") : "",
           x ? (TIPOS[x.tipo] || x.tipo) : "",
           x ? x.nome : "",
-          x ? hora(x.ts) : ""
+          x ? hora(x.ts) : "",
+          x && x.foraListagem ? "Sim" : "",
+          x && x.substituido ? "Sim" : ""
         ];
         valores.forEach((v, c) => {
           const cel = linha.getCell(c + 1);
           cel.value = v;
-          cel.font = { size: 12 };
+          cel.font = { size: 11 };
           cel.border = bordas;
           cel.alignment = { horizontal: "center", vertical: "middle" };
           if (c === 2) cel.numFmt = "@";
         });
       }
-      ws.pageSetup.printArea = "A1:G" + (2 + total);
+      ws.pageSetup.printArea = "A1:I" + (2 + total);
     });
 
     return wb.xlsx.writeBuffer();
@@ -934,6 +957,8 @@
           <div><span>Média por dia</span><b>${media(A.totalCarros, diasComLavagem)}</b></div>
           <div><span>Melhor dia</span><b>${melhorDia(mapaGeral)}</b></div>
           <div><span>Idas ao showroom</span><b>${A.totalIdas}</b></div>
+          <div><span>Fora da listagem</span><b>${A.totalFora}</b></div>
+          <div><span>Substituídos</span><b>${A.totalSubs}</b></div>
         </div>
         <div class="mixwrap">${barraMix(tiposGeral, false)}${legendaMix(tiposGeral)}</div>
       </section>`;
@@ -951,9 +976,11 @@
           ${barraMix(p.tipos, true)}
           <dl class="fatos">
             <div><dt>Média por dia</dt><dd>${media(p.total, nDias)}</dd></div>
-            <div><dt>Dias trabalhados</dt><dd>${nDias}</dd></div>
+            <div><dt>Dias registrados</dt><dd>${nDias}</dd></div>
             <div><dt>Melhor dia</dt><dd>${melhorDia(p.dias)}</dd></div>
             <div><dt>Idas ao showroom</dt><dd>${p.idas}</dd></div>
+            <div><dt>Fora da listagem</dt><dd>${p.foraListagem}</dd></div>
+            <div><dt>Substituídos</dt><dd>${p.substituido}</dd></div>
           </dl>
         </article>`;
     }).join("");
@@ -1027,10 +1054,12 @@
           </div>
           <div class="tipos-lista">${linhasTipos}</div>
           <div class="extras">
-            <div><span class="rotulo">Dias trabalhados</span><span class="valor">${nDias}</span></div>
+            <div><span class="rotulo">Dias registrados</span><span class="valor">${nDias}</span></div>
             <div><span class="rotulo">Média por dia</span><span class="valor">${media(p.total, nDias)}</span></div>
             <div><span class="rotulo">Melhor dia</span><span class="valor">${melhorDia(p.dias)}</span></div>
             <div><span class="rotulo">Idas ao showroom</span><span class="valor">${p.idas}</span></div>
+            <div><span class="rotulo">Fora da listagem</span><span class="valor">${p.foraListagem}</span></div>
+            <div><span class="rotulo">Substituídos</span><span class="valor">${p.substituido}</span></div>
           </div>
         </div>`;
     }).join("");
@@ -1043,6 +1072,8 @@
         <div class="item"><span class="rotulo">Média/dia</span><span class="valor">${media(A.totalCarros, diasComLavagem)}</span></div>
         <div class="item"><span class="rotulo">Melhor dia</span><span class="valor">${melhorDia(mapaGeral)}</span></div>
         <div class="item"><span class="rotulo">Idas showroom</span><span class="valor">${A.totalIdas}</span></div>
+        <div class="item"><span class="rotulo">Fora listagem</span><span class="valor">${A.totalFora}</span></div>
+        <div class="item"><span class="rotulo">Substituídos</span><span class="valor">${A.totalSubs}</span></div>
       </div>`;
 
     const maxGeral = Math.max(...Object.values(mapaGeral), 1);
@@ -1090,7 +1121,7 @@
       <div class="amostras">${lideres}</div>
 
       <h2>Comparativo</h2>
-      <p class="nota">Um card por colaborador, com os tipos, os dias trabalhados e a média por dia. No fim, a faixa Geral soma toda a equipe.</p>
+      <p class="nota">Um card por colaborador, com os tipos, os dias registrados e a média por dia. No fim, a faixa Geral soma toda a equipe.</p>
       <div class="comparativo">${compCards}</div>
       ${geralFaixa}
 
