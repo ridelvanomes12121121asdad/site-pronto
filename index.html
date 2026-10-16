@@ -106,6 +106,73 @@
   .pop b { display: block; font-weight: 600; }
   .pop span { color: var(--mut); font-size: 13px; }
 
+  .modal-fundo {
+    position: fixed; inset: 0; background: rgba(0,0,0,.5);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100; padding: 16px;
+  }
+  .modal {
+    background: var(--panel); border-radius: 18px; padding: 26px;
+    width: min(100%, 520px); max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,.4);
+  }
+  .modal h3 { font-size: 26px; margin-bottom: 4px; }
+  .modal .sub { color: var(--mut); font-size: 14px; margin-bottom: 18px; }
+  .modal label { display: block; font-weight: 600; font-size: 14px; margin: 18px 0 8px; color: var(--mut); text-transform: uppercase; letter-spacing: .05em; }
+  .modal .dias-grade {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    gap: 8px;
+  }
+  .modal .dias-grade button {
+    border: 2px solid var(--line); background: var(--panel); color: var(--ink);
+    border-radius: 10px; padding: 12px 6px;
+    font: 700 18px var(--font-d); cursor: pointer;
+    transition: border-color .12s, background .12s;
+  }
+  .modal .dias-grade button.on {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, var(--panel));
+    color: var(--accent);
+  }
+  .modal .tipo-grade {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .modal .tipo-grade button {
+    border: 2px solid var(--line); background: var(--panel); color: var(--ink);
+    border-radius: 12px; padding: 14px 10px;
+    font: 600 14px var(--font-b); cursor: pointer;
+    text-align: left;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .modal .tipo-grade button b { font: 700 16px var(--font-d); }
+  .modal .tipo-grade button small { color: var(--mut); font-size: 12px; font-weight: 500; }
+  .modal .tipo-grade button.on {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, var(--panel));
+  }
+  .modal .info {
+    margin-top: 18px;
+    background: var(--soft);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--mut);
+    line-height: 1.5;
+  }
+  .modal .info b { color: var(--ink); }
+  .modal .acoes {
+    display: flex; gap: 10px; margin-top: 22px;
+  }
+  .modal .acoes button {
+    flex: 1; padding: 14px; border-radius: 12px; font: 600 16px var(--font-b); cursor: pointer; border: 0;
+  }
+  .modal .cancelar { background: var(--soft); color: var(--ink); }
+  .modal .confirmar { background: var(--accent); color: var(--on-accent); }
+  .modal .confirmar:disabled { opacity: .5; cursor: wait; }
+
   .hero {
     background: var(--hero); color: #fff; border-radius: 22px; padding: 30px 32px;
     display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px 40px; margin-top: 20px;
@@ -331,6 +398,9 @@
     .marca h1 { font-size: 24px; }
     .controles { width: 100%; }
     .seg { flex: 1; }
+    .modal { padding: 20px; }
+    .modal h3 { font-size: 22px; }
+    .modal .tipo-grade { grid-template-columns: 1fr; }
   }
   @media (prefers-reduced-motion: reduce) { .btn-icone.gira svg { animation: none; } }
 </style>
@@ -423,14 +493,32 @@
     return iso(d);
   }
   function brData(dia) { return dia.split("-").reverse().join("/"); }
+  function brDataNome(dia) { const p = dia.split("-"); return p[2] + "-" + p[1] + "-" + p[0]; }
   function fmtData(dia) {
     const [a, m, d] = dia.split("-").map(Number);
     return new Date(a, m - 1, d).toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit", year: "2-digit" });
+  }
+  function fmtDataLonga(dia) {
+    const [a, m, d] = dia.split("-").map(Number);
+    return new Date(a, m - 1, d).toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   }
   function fmtDiaCurto(dia) { const p = dia.split("-"); return p[2] + "/" + p[1]; }
   function hora(ts) { return new Date(ts).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }); }
   function media(total, dias) { return dias ? (total / dias).toFixed(1).replace(".", ",") : "—"; }
   function mediaNum(total, dias) { return dias ? Math.round((total / dias) * 10) / 10 : null; }
+
+  // Nome do tipo como sai na planilha: "Novo" em vez de "Carro novo"
+  function tipoParaPlanilha(k) {
+    return k === "novo" ? "Novo" : (TIPOS[k] || k);
+  }
+
+  function marcasDoRegistro(r) {
+    const marcas = [];
+    if (r.polimento)    marcas.push("Polimento");
+    if (r.foraListagem) marcas.push("Fora da listagem");
+    if (r.substituido)  marcas.push("Substituído");
+    return marcas.join(", ");
+  }
 
   function ordenarDias(mapa) {
     return Object.entries(mapa).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? 1 : -1));
@@ -524,6 +612,18 @@
     const fim = brData(hojeOperacional());
     return inicio === "0000-00-00" ? "até " + fim : brData(inicio) + " a " + fim;
   }
+  function ultimosDias(n) {
+    const lista = [];
+    const base = new Date();
+    if (base.getHours() >= HORA_VIRADA) base.setDate(base.getDate() + 1);
+    for (let i = 0; i < n; i++) {
+      const d = new Date(base);
+      d.setDate(d.getDate() - i);
+      lista.push(iso(d));
+    }
+    return lista;
+  }
+
   function analisar() {
     const inicio = inicioDoPeriodo();
     const pessoas = {};
@@ -531,6 +631,7 @@
       pessoas[n] = {
         total: 0,
         tipos: { novo: 0, of: 0, teste: 0, show: 0, outros: 0 },
+        polimento: 0,
         foraListagem: 0,
         substituido: 0,
         dias: {},
@@ -539,6 +640,7 @@
     });
     const diasGeral = {};
     let totalCarros = 0;
+    let totalPolimento = 0;
     let totalFora = 0;
     let totalSubs = 0;
     for (const [dia, registros] of Object.entries(bruto.lavagens)) {
@@ -548,6 +650,7 @@
         if (!p) continue;
         p.total++;
         if (p.tipos[r.tipo] !== undefined) p.tipos[r.tipo]++;
+        if (r.polimento)    { p.polimento++;    totalPolimento++; }
         if (r.foraListagem) { p.foraListagem++; totalFora++; }
         if (r.substituido)  { p.substituido++;  totalSubs++; }
         p.dias[dia] = (p.dias[dia] || 0) + 1;
@@ -570,7 +673,7 @@
         (d[r.nome] = d[r.nome] || []).push(r.ts);
       }
     }
-    return { pessoas, diasGeral, idasPorDia, totalCarros, totalIdas, totalFora, totalSubs };
+    return { pessoas, diasGeral, idasPorDia, totalCarros, totalIdas, totalPolimento, totalFora, totalSubs };
   }
 
   const fundoBranco = {
@@ -678,6 +781,20 @@
     return saida.sort((a, b) => a.ts - b.ts);
   }
 
+  function registrosDosDias(diasLista) {
+    const setDias = new Set(diasLista);
+    const saida = [];
+    for (const [dia, registros] of Object.entries(bruto.lavagens)) {
+      if (!setDias.has(dia)) continue;
+      for (const [id, r] of Object.entries(registros || {})) {
+        if (EQUIPE[r.nome] === undefined) continue;
+        saida.push({ dia, id, ...r });
+      }
+    }
+    return saida.sort((a, b) => a.ts - b.ts);
+  }
+
+  // ============ PLANILHA COM GRÁFICOS ============
   async function gerarXlsx(comGraficos) {
     const A = analisar();
     const wb = new ExcelJS.Workbook();
@@ -707,8 +824,8 @@
     chavesTipos.forEach((k) => { tiposGeral[k] = nomes.reduce((s, n) => s + A.pessoas[n].tipos[k], 0); });
 
     const r = wb.addWorksheet("Resumo", { views: [{ showGridLines: false }] });
-    r.columns = [28, 14, 14, 14, 14, 14, 12, 10, 12, 22, 16, 14, 14].map((width) => ({ width }));
-    r.mergeCells("A1:M1");
+    r.columns = [28, 14, 14, 14, 14, 14, 12, 10, 12, 22, 16, 14, 14, 14].map((width) => ({ width }));
+    r.mergeCells("A1:N1");
     r.getCell("A1").value = "Painel da Lavagem";
     r.getCell("A1").font = { bold: true, size: 20, color: { argb: PETROLEO } };
     r.getCell("A2").value = "Período: " + PERIODOS[periodo] + " (" + intervaloTexto() + ")";
@@ -722,6 +839,7 @@
       ["Média geral por dia", mediaNum(A.totalCarros, diasComLavagem)],
       ["Melhor dia (geral)", melhorDia(mapaGeral)],
       ["Idas ao showroom", A.totalIdas],
+      ["Carros para polimento", A.totalPolimento],
       ["Carros fora da listagem", A.totalFora],
       ["Carros substituídos", A.totalSubs]
     ].forEach((linha) => {
@@ -730,17 +848,17 @@
       if (linha[0] === "Média geral por dia") l.getCell(2).numFmt = "0.0";
     });
     r.addRow([]);
-    const cab = r.addRow(["Colaborador", ...chavesTipos.map((k) => TIPOS[k]), "Total", "Dias", "Média/dia", "Melhor dia", "Idas showroom", "Fora listagem", "Substituído"]);
+    const cab = r.addRow(["Colaborador", ...chavesTipos.map((k) => TIPOS[k]), "Total", "Dias", "Média/dia", "Melhor dia", "Idas showroom", "Para polimento", "Fora listagem", "Substituído"]);
     cabecalho(cab);
     nomes.forEach((n) => {
       const p = A.pessoas[n];
       const nDias = Object.keys(p.dias).length;
-      const l = r.addRow([n, ...chavesTipos.map((k) => p.tipos[k]), p.total, nDias, mediaNum(p.total, nDias), melhorDia(p.dias), p.idas, p.foraListagem, p.substituido]);
+      const l = r.addRow([n, ...chavesTipos.map((k) => p.tipos[k]), p.total, nDias, mediaNum(p.total, nDias), melhorDia(p.dias), p.idas, p.polimento, p.foraListagem, p.substituido]);
       corpo(l);
       l.getCell(1 + chavesTipos.length + 3).numFmt = "0.0";
     });
     const geral = r.addRow(["Geral", ...chavesTipos.map((k) => tiposGeral[k]), A.totalCarros, diasComLavagem,
-      mediaNum(A.totalCarros, diasComLavagem), melhorDia(mapaGeral), A.totalIdas, A.totalFora, A.totalSubs]);
+      mediaNum(A.totalCarros, diasComLavagem), melhorDia(mapaGeral), A.totalIdas, A.totalPolimento, A.totalFora, A.totalSubs]);
     corpo(geral, true);
     geral.getCell(1 + chavesTipos.length + 3).numFmt = "0.0";
     geral.eachCell((c) => { c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE8EEF2" } }; });
@@ -771,12 +889,13 @@
     });
 
     const reg = wb.addWorksheet("Registros", { views: [{ state: "frozen", ySplit: 1 }] });
-    reg.columns = [14, 10, 16, 16, 24, 16, 14, 16, 14].map((width) => ({ width }));
-    cabecalho(reg.addRow(["Data", "Hora", "Colaborador", "Tipo", "Carro", "Placa/Chassi", "Cor", "Fora da listagem", "Substituído"]));
+    reg.columns = [14, 10, 16, 16, 24, 16, 14, 16, 16, 14].map((width) => ({ width }));
+    cabecalho(reg.addRow(["Data", "Hora", "Colaborador", "Tipo", "Carro", "Placa/Chassi", "Cor", "Para polimento", "Fora da listagem", "Substituído"]));
     listarRegistros(bruto.lavagens).forEach((x) => {
       const l = reg.addRow([
-        dataExcel(x.dia), hora(x.ts), x.nome, TIPOS[x.tipo] || x.tipo,
+        dataExcel(x.dia), hora(x.ts), x.nome, tipoParaPlanilha(x.tipo),
         x.carro || "", String(x.placa || ""), x.cor || "",
+        x.polimento ? "Sim" : "",
         x.foraListagem ? "Sim" : "",
         x.substituido ? "Sim" : ""
       ]);
@@ -784,7 +903,7 @@
       l.getCell(1).numFmt = "dd/mm/yyyy";
       l.getCell(6).numFmt = "@";
     });
-    reg.autoFilter = { from: "A1", to: "I1" };
+    reg.autoFilter = { from: "A1", to: "J1" };
 
     const sh = wb.addWorksheet("Showroom", { views: [{ state: "frozen", ySplit: 1 }] });
     sh.columns = [14, 10, 16].map((width) => ({ width }));
@@ -798,54 +917,76 @@
     return wb.xlsx.writeBuffer();
   }
 
-  async function gerarPlanilhaDiaria() {
+  // ============ PLANILHA DIÁRIA — várias abas ============
+  async function gerarPlanilhaDiaria(diasLista) {
     const wb = new ExcelJS.Workbook();
     wb.creator = "Painel da Lavagem";
     wb.created = new Date();
     const preto = { style: "thin", color: { argb: "FF000000" } };
     const bordas = { top: preto, left: preto, bottom: preto, right: preto };
     const LINHAS_MINIMAS = 15;
+
+    const dias = diasLista.slice().sort();
     const porDia = {};
-    listarRegistros(bruto.lavagens).forEach((x) => {
-      (porDia[x.dia] = porDia[x.dia] || []).push(x);
-    });
-    let dias = Object.keys(porDia).sort();
-    if (!dias.length) dias = [hojeOperacional()];
+    dias.forEach((d) => { porDia[d] = []; });
+    const todosRegs = registrosDosDias(dias);
+    todosRegs.forEach((x) => { (porDia[x.dia] = porDia[x.dia] || []).push(x); });
 
     dias.forEach((dia) => {
       const registros = porDia[dia] || [];
       const total = Math.max(LINHAS_MINIMAS, registros.length);
-      const ws = wb.addWorksheet(dia.split("-").reverse().join("-"), {
+
+      const temMarca = registros.some((r) => r.polimento || r.foraListagem || r.substituido);
+
+      let larguraObs = 0;
+      if (temMarca) {
+        registros.forEach((r) => {
+          const t = marcasDoRegistro(r);
+          if (t.length > larguraObs) larguraObs = t.length;
+        });
+      }
+      const larguraColObs = Math.max(18, larguraObs + 3);
+
+      const colunas = temMarca
+        ? ["", "VEICULO", "CHASSI", "COR", "SETOR", "LAVADOR", "HORÁRIO", "OBSERVAÇÃO"]
+        : ["", "VEICULO", "CHASSI", "COR", "SETOR", "LAVADOR", "HORÁRIO"];
+      const numCols = colunas.length;
+
+      const ws = wb.addWorksheet(brDataNome(dia), {
         pageSetup: {
           paperSize: 9, orientation: "portrait",
           fitToPage: true, fitToWidth: 1, fitToHeight: 0, horizontalCentered: true,
           margins: { left: 0.5, right: 0.5, top: 0.6, bottom: 0.6, header: 0.3, footer: 0.3 }
         }
       });
-      ws.columns = [6, 22, 14, 14, 18, 20, 12, 16, 14].map((width) => ({ width }));
 
-      ws.mergeCells("A1:F1");
-      ws.mergeCells("G1:I1");
+      const larguras = temMarca
+        ? [6, 24, 14, 14, 20, 22, 12, larguraColObs]
+        : [6, 24, 14, 14, 20, 22, 12];
+      ws.columns = larguras.map((w) => ({ width: w }));
+
+      ws.mergeCells("A1:D1");
+      ws.mergeCells("E1:G1");
       ws.getCell("A1").value = "PLANILHA DE LAVAGEM";
-      ws.getCell("G1").value = "DATA: " + dia.split("-").reverse().join(" / ");
+      ws.getCell("E1").value = "DATA: " + brData(dia);
       const l1 = ws.getRow(1);
       l1.height = 30;
-      for (let c = 1; c <= 9; c++) {
+      for (let c = 1; c <= numCols; c++) {
         const cel = l1.getCell(c);
         cel.border = bordas;
         cel.alignment = { horizontal: "center", vertical: "middle" };
       }
       ws.getCell("A1").font = { bold: true, size: 15 };
-      ws.getCell("G1").font = { bold: true, size: 12 };
+      ws.getCell("E1").font = { bold: true, size: 12 };
 
       const l2 = ws.getRow(2);
       l2.height = 24;
-      ["", "VEICULO", "CHASSI", "COR", "SETOR", "LAVADOR", "HORÁRIO", "FORA LISTAGEM", "SUBSTITUÍDO"].forEach((texto, i) => {
+      colunas.forEach((texto, i) => {
         const cel = l2.getCell(i + 1);
         cel.value = texto;
-        cel.font = { bold: true, size: 11 };
+        cel.font = { bold: true, size: 12 };
         cel.border = bordas;
-        cel.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+        cel.alignment = { horizontal: "center", vertical: "middle" };
       });
 
       for (let i = 0; i < total; i++) {
@@ -857,23 +998,131 @@
           x ? (x.carro || "") : "",
           x ? String(x.placa || "") : "",
           x ? (x.cor || "") : "",
-          x ? (TIPOS[x.tipo] || x.tipo) : "",
+          x ? tipoParaPlanilha(x.tipo) : "",
           x ? x.nome : "",
-          x ? hora(x.ts) : "",
-          x && x.foraListagem ? "Sim" : "",
-          x && x.substituido ? "Sim" : ""
+          x ? hora(x.ts) : ""
         ];
+        if (temMarca) valores.push(x ? marcasDoRegistro(x) : "");
+
         valores.forEach((v, c) => {
           const cel = linha.getCell(c + 1);
           cel.value = v;
-          cel.font = { size: 11 };
+          cel.font = { size: 12 };
           cel.border = bordas;
-          cel.alignment = { horizontal: "center", vertical: "middle" };
+          if (c === 7) {
+            cel.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+          } else {
+            cel.alignment = { horizontal: "center", vertical: "middle" };
+          }
           if (c === 2) cel.numFmt = "@";
         });
       }
-      ws.pageSetup.printArea = "A1:I" + (2 + total);
+      ws.pageSetup.printArea = "A1:" + (temMarca ? "H" : "G") + (2 + total);
     });
+
+    return wb.xlsx.writeBuffer();
+  }
+
+  // ============ PLANILHA DE UM DIA SÓ ============
+  async function gerarPlanilhaDeUmDia(dia) {
+    const wb = new ExcelJS.Workbook();
+    wb.creator = "Painel da Lavagem";
+    wb.created = new Date();
+    const preto = { style: "thin", color: { argb: "FF000000" } };
+    const bordas = { top: preto, left: preto, bottom: preto, right: preto };
+    const LINHAS_MINIMAS = 15;
+
+    const registros = [];
+    const diaRegs = bruto.lavagens[dia] || {};
+    for (const [id, r] of Object.entries(diaRegs)) {
+      if (EQUIPE[r.nome] === undefined) continue;
+      registros.push({ dia, id, ...r });
+    }
+    registros.sort((a, b) => a.ts - b.ts);
+
+    const total = Math.max(LINHAS_MINIMAS, registros.length);
+    const temMarca = registros.some((r) => r.polimento || r.foraListagem || r.substituido);
+
+    let larguraObs = 0;
+    if (temMarca) {
+      registros.forEach((r) => {
+        const t = marcasDoRegistro(r);
+        if (t.length > larguraObs) larguraObs = t.length;
+      });
+    }
+    const larguraColObs = Math.max(18, larguraObs + 3);
+
+    const colunas = temMarca
+      ? ["", "VEICULO", "CHASSI", "COR", "SETOR", "LAVADOR", "HORÁRIO", "OBSERVAÇÃO"]
+      : ["", "VEICULO", "CHASSI", "COR", "SETOR", "LAVADOR", "HORÁRIO"];
+    const numCols = colunas.length;
+
+    const ws = wb.addWorksheet(brDataNome(dia), {
+      pageSetup: {
+        paperSize: 9, orientation: "portrait",
+        fitToPage: true, fitToWidth: 1, fitToHeight: 0, horizontalCentered: true,
+        margins: { left: 0.5, right: 0.5, top: 0.6, bottom: 0.6, header: 0.3, footer: 0.3 }
+      }
+    });
+
+    const larguras = temMarca
+      ? [6, 24, 14, 14, 20, 22, 12, larguraColObs]
+      : [6, 24, 14, 14, 20, 22, 12];
+    ws.columns = larguras.map((w) => ({ width: w }));
+
+    ws.mergeCells("A1:D1");
+    ws.mergeCells("E1:G1");
+    ws.getCell("A1").value = "PLANILHA DE LAVAGEM";
+    ws.getCell("E1").value = "DATA: " + brData(dia);
+    const l1 = ws.getRow(1);
+    l1.height = 30;
+    for (let c = 1; c <= numCols; c++) {
+      const cel = l1.getCell(c);
+      cel.border = bordas;
+      cel.alignment = { horizontal: "center", vertical: "middle" };
+    }
+    ws.getCell("A1").font = { bold: true, size: 15 };
+    ws.getCell("E1").font = { bold: true, size: 12 };
+
+    const l2 = ws.getRow(2);
+    l2.height = 24;
+    colunas.forEach((texto, i) => {
+      const cel = l2.getCell(i + 1);
+      cel.value = texto;
+      cel.font = { bold: true, size: 12 };
+      cel.border = bordas;
+      cel.alignment = { horizontal: "center", vertical: "middle" };
+    });
+
+    for (let i = 0; i < total; i++) {
+      const x = registros[i];
+      const linha = ws.getRow(3 + i);
+      linha.height = 22;
+      const valores = [
+        i + 1,
+        x ? (x.carro || "") : "",
+        x ? String(x.placa || "") : "",
+        x ? (x.cor || "") : "",
+        x ? tipoParaPlanilha(x.tipo) : "",
+        x ? x.nome : "",
+        x ? hora(x.ts) : ""
+      ];
+      if (temMarca) valores.push(x ? marcasDoRegistro(x) : "");
+
+      valores.forEach((v, c) => {
+        const cel = linha.getCell(c + 1);
+        cel.value = v;
+        cel.font = { size: 12 };
+        cel.border = bordas;
+        if (c === 7) {
+          cel.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+        } else {
+          cel.alignment = { horizontal: "center", vertical: "middle" };
+        }
+        if (c === 2) cel.numFmt = "@";
+      });
+    }
+    ws.pageSetup.printArea = "A1:" + (temMarca ? "H" : "G") + (2 + total);
 
     return wb.xlsx.writeBuffer();
   }
@@ -889,26 +1138,142 @@
     setTimeout(() => URL.revokeObjectURL(link.href), 4000);
   }
 
-  async function exportar(tipo) {
-    if (exportando) return;
+  function aguardar(ms) { return new Promise((r) => setTimeout(r, ms)); }
+
+  // ============ MODAL DE EXPORTAÇÃO ============
+  function abrirModalExportacao(modo) {
     if (!bruto) { toast("Aguarde os dados carregarem."); return; }
-    const comGraficos = tipo === "graficos";
-    if (typeof ExcelJS === "undefined" || (comGraficos && typeof Chart === "undefined")) {
+    if (typeof ExcelJS === "undefined" || (modo === "graficos" && typeof Chart === "undefined")) {
       toast("A biblioteca da planilha não carregou. Verifique a internet e recarregue.");
       return;
     }
+    const ehSimples = modo === "simples";
+
+    const fundo = document.createElement("div");
+    fundo.className = "modal-fundo";
+
+    let diasEscolhidos = 1;
+    let tipo = ehSimples ? "unico" : "unico";
+
+    const opcoesDias = [1, 2, 3, 4, 5, 6, 7, 8, 10, 15, 30];
+
+    function renderModal() {
+      const diasLista = ultimosDias(diasEscolhidos);
+      const dataInicial = diasLista[diasLista.length - 1];
+      const dataFinal = diasLista[0];
+      const textoPeriodo = diasEscolhidos === 1
+        ? fmtDataLonga(dataFinal)
+        : fmtDataLonga(dataInicial) + " até " + fmtDataLonga(dataFinal);
+
+      fundo.innerHTML = `
+        <div class="modal">
+          <h3>Exportar planilha</h3>
+          <div class="sub">${ehSimples ? "Modelo da folha de lavagem" : "Planilha com gráficos e tabelas"}</div>
+
+          <label>Quantos dias?</label>
+          <div class="dias-grade" id="diasGrade">
+            ${opcoesDias.map((n) => `
+              <button type="button" data-dias="${n}" class="${diasEscolhidos === n ? "on" : ""}">
+                ${n} ${n === 1 ? "dia" : "dias"}
+              </button>`).join("")}
+          </div>
+
+          ${ehSimples ? `
+            <label>Como quer o arquivo?</label>
+            <div class="tipo-grade" id="tipoGrade">
+              <button type="button" data-tipo="unico" class="${tipo === "unico" ? "on" : ""}">
+                <b>Um arquivo só</b>
+                <small>Todas as ${diasEscolhidos === 1 ? "data" : "datas"} em abas dentro de um único xlsx</small>
+              </button>
+              <button type="button" data-tipo="separado" class="${tipo === "separado" ? "on" : ""}">
+                <b>Um arquivo por dia</b>
+                <small>${diasEscolhidos} arquivo${diasEscolhidos === 1 ? "" : "s"} xlsx separados</small>
+              </button>
+            </div>
+          ` : ""}
+
+          <div class="info">
+            <b>Período selecionado:</b> ${textoPeriodo}
+            ${ehSimples && tipo === "separado"
+              ? `<br><b>Atenção:</b> o navegador vai baixar ${diasEscolhidos} arquivo${diasEscolhidos === 1 ? "" : "s"} na sua pasta de Downloads padrão. Para salvar em uma pasta específica, você pode mudar a pasta padrão do navegador ou mover depois.`
+              : ""}
+          </div>
+
+          <div class="acoes">
+            <button class="cancelar" id="mCancelar">Cancelar</button>
+            <button class="confirmar" id="mConfirmar">Baixar</button>
+          </div>
+        </div>`;
+
+      fundo.querySelectorAll("[data-dias]").forEach((b) => {
+        b.onclick = () => {
+          diasEscolhidos = Number(b.dataset.dias);
+          renderModal();
+        };
+      });
+      fundo.querySelectorAll("[data-tipo]").forEach((b) => {
+        b.onclick = () => {
+          tipo = b.dataset.tipo;
+          renderModal();
+        };
+      });
+      fundo.querySelector("#mCancelar").onclick = () => fundo.remove();
+      fundo.onclick = (e) => { if (e.target === fundo) fundo.remove(); };
+      fundo.querySelector("#mConfirmar").onclick = () => {
+        fundo.remove();
+        dispararExportacao(modo, diasEscolhidos, tipo);
+      };
+    }
+
+    renderModal();
+    document.body.appendChild(fundo);
+  }
+
+  // ============ DISPARAR EXPORTAÇÃO ============
+  async function dispararExportacao(modo, quantidadeDias, tipo) {
+    if (exportando) return;
     exportando = true;
     $("#exportar").disabled = true;
-    toast("Gerando planilha…");
+
     try {
-      const buffer = comGraficos ? await gerarXlsx(true) : await gerarPlanilhaDiaria();
-      const nome = (comGraficos ? "painel-lavagem-" : "planilha-lavagem-") + periodo + "-" + hojeOperacional() + (comGraficos ? "-graficos" : "") + ".xlsx";
-      baixarArquivo(buffer, nome);
-      toast("Planilha pronta: " + nome);
+      const diasLista = ultimosDias(quantidadeDias);
+      const dataInicial = diasLista[diasLista.length - 1];
+      const dataFinal = diasLista[0];
+      const tagPeriodo = quantidadeDias === 1
+        ? brDataNome(dataFinal)
+        : brDataNome(dataInicial) + "_a_" + brDataNome(dataFinal);
+
+      if (modo === "graficos") {
+        toast("Gerando planilha com gráficos…");
+        const buffer = await gerarXlsx(true);
+        const nome = "painel-lavagem-" + tagPeriodo + "-graficos.xlsx";
+        baixarArquivo(buffer, nome);
+        toast("Planilha pronta: " + nome);
+      } else if (tipo === "unico") {
+        toast("Gerando planilha com " + quantidadeDias + " aba" + (quantidadeDias === 1 ? "" : "s") + "…");
+        const buffer = await gerarPlanilhaDiaria(diasLista);
+        const nome = quantidadeDias === 1
+          ? "planilha-lavagem-" + brDataNome(dataFinal) + ".xlsx"
+          : "planilhas-lavagem-" + tagPeriodo + ".xlsx";
+        baixarArquivo(buffer, nome);
+        toast("Planilha pronta: " + nome);
+      } else {
+        toast("Baixando " + quantidadeDias + " arquivo" + (quantidadeDias === 1 ? "" : "s") + "…");
+        const ordenados = diasLista.slice().sort();
+        for (let i = 0; i < ordenados.length; i++) {
+          const d = ordenados[i];
+          const buffer = await gerarPlanilhaDeUmDia(d);
+          const nome = "planilha-lavagem-" + brDataNome(d) + ".xlsx";
+          baixarArquivo(buffer, nome);
+          await aguardar(350);
+        }
+        toast(quantidadeDias + " arquivo" + (quantidadeDias === 1 ? "" : "s") + " baixado" + (quantidadeDias === 1 ? "" : "s"));
+      }
     } catch (e) {
       console.error(e);
       toast("Não foi possível gerar a planilha.");
     }
+
     exportando = false;
     $("#exportar").disabled = false;
   }
@@ -957,6 +1322,7 @@
           <div><span>Média por dia</span><b>${media(A.totalCarros, diasComLavagem)}</b></div>
           <div><span>Melhor dia</span><b>${melhorDia(mapaGeral)}</b></div>
           <div><span>Idas ao showroom</span><b>${A.totalIdas}</b></div>
+          <div><span>Para polimento</span><b>${A.totalPolimento}</b></div>
           <div><span>Fora da listagem</span><b>${A.totalFora}</b></div>
           <div><span>Substituídos</span><b>${A.totalSubs}</b></div>
         </div>
@@ -979,6 +1345,7 @@
             <div><dt>Dias registrados</dt><dd>${nDias}</dd></div>
             <div><dt>Melhor dia</dt><dd>${melhorDia(p.dias)}</dd></div>
             <div><dt>Idas ao showroom</dt><dd>${p.idas}</dd></div>
+            <div><dt>Para polimento</dt><dd>${p.polimento}</dd></div>
             <div><dt>Fora da listagem</dt><dd>${p.foraListagem}</dd></div>
             <div><dt>Substituídos</dt><dd>${p.substituido}</dd></div>
           </dl>
@@ -1058,6 +1425,7 @@
             <div><span class="rotulo">Média por dia</span><span class="valor">${media(p.total, nDias)}</span></div>
             <div><span class="rotulo">Melhor dia</span><span class="valor">${melhorDia(p.dias)}</span></div>
             <div><span class="rotulo">Idas ao showroom</span><span class="valor">${p.idas}</span></div>
+            <div><span class="rotulo">Para polimento</span><span class="valor">${p.polimento}</span></div>
             <div><span class="rotulo">Fora da listagem</span><span class="valor">${p.foraListagem}</span></div>
             <div><span class="rotulo">Substituídos</span><span class="valor">${p.substituido}</span></div>
           </div>
@@ -1072,6 +1440,7 @@
         <div class="item"><span class="rotulo">Média/dia</span><span class="valor">${media(A.totalCarros, diasComLavagem)}</span></div>
         <div class="item"><span class="rotulo">Melhor dia</span><span class="valor">${melhorDia(mapaGeral)}</span></div>
         <div class="item"><span class="rotulo">Idas showroom</span><span class="valor">${A.totalIdas}</span></div>
+        <div class="item"><span class="rotulo">Para polimento</span><span class="valor">${A.totalPolimento}</span></div>
         <div class="item"><span class="rotulo">Fora listagem</span><span class="valor">${A.totalFora}</span></div>
         <div class="item"><span class="rotulo">Substituídos</span><span class="valor">${A.totalSubs}</span></div>
       </div>`;
@@ -1158,7 +1527,7 @@
   menuExp.onclick = (e) => e.stopPropagation();
   document.addEventListener("click", () => { menuExp.hidden = true; });
   menuExp.querySelectorAll("[data-x]").forEach((b) => {
-    b.onclick = () => { menuExp.hidden = true; exportar(b.dataset.x); };
+    b.onclick = () => { menuExp.hidden = true; abrirModalExportacao(b.dataset.x); };
   });
 
   carregar();
